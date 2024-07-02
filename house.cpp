@@ -34,13 +34,13 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static HOUSE g_House[HOUSE_MAX]; // 家の最大数
+static HOUSE house[HOUSE_MAX]; // 家の最大数
 
 DX11_MODEL modelHigh;    // 高いモデル情報
 DX11_MODEL modelMiddle;  // 中程度のモデル情報
 DX11_MODEL modelLow;     // 低いモデル情報
 
-static BOOL	g_Load = FALSE;		// 初期化を行ったかのフラグ
+static BOOL	load = FALSE;		// 初期化を行ったかのフラグ
 
 //=============================================================================
 // 初期化処理
@@ -53,17 +53,17 @@ HRESULT InitHouse(void)
 	for (int i = 0; i < HOUSE_MAX; i++)
 	{
 
-		g_House[i].pos = { -200.0f, HOUSE_OFFSET_Y, 300.0f };
+		house[i].pos = { -200.0f, HOUSE_OFFSET_Y, 300.0f };
 
-		g_House[i].rot = { 0.0f, 0.0f, 0.0f };
-		g_House[i].scl = { 2.0f, 2.0f, 2.0f };
+		house[i].rot = { 0.0f, 0.0f, 0.0f };
+		house[i].scl = { 2.0f, 2.0f, 2.0f };
 
-		g_House[i].size = { HOUSE_SIZE_X, HOUSE_SIZE_Y, HOUSE_SIZE_Z };
+		house[i].size = { HOUSE_SIZE_X, HOUSE_SIZE_Y, HOUSE_SIZE_Z };
 
-		g_House[i].draw = TRUE;	// TRUE:表示 / FALSE:非表示
-		g_House[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
+		house[i].draw = TRUE;	// TRUE:表示 / FALSE:非表示
+		house[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
 
-		g_House[i].modelNo = 0;
+		house[i].modelNo = 0;
 
 	}
 
@@ -80,12 +80,12 @@ HRESULT InitHouse(void)
 	//　位置に設定
 	//-------------------------------------------------------------------------
 	{
-		g_House[0].pos = { -200.0f, HOUSE_OFFSET_Y, 300.0f };
-		g_House[1].pos = {    0.0f, HOUSE_OFFSET_Y, 150.0f };
-		g_House[2].pos = {  200.0f, HOUSE_OFFSET_Y, 0.0f   };
+		house[0].pos = { -200.0f, HOUSE_OFFSET_Y, 300.0f };
+		house[1].pos = {    0.0f, HOUSE_OFFSET_Y, 150.0f };
+		house[2].pos = {  200.0f, HOUSE_OFFSET_Y, 0.0f   };
 	}
 
-	g_Load = TRUE;
+	load = TRUE;
 
 	return S_OK;
 }
@@ -98,13 +98,13 @@ void UninitHouse(void)
 	//-------------------------------------------------------------------------
 	// モデルの解放処理
 	//-------------------------------------------------------------------------
-	if (g_Load)
+	if (load)
 	{
 		UnloadModel(&modelHigh);
 		UnloadModel(&modelMiddle);
 		UnloadModel(&modelLow);
 
-		g_Load = FALSE;
+		load = FALSE;
 	}
 
 }
@@ -125,34 +125,34 @@ void UpdateHouse(void)
 	for (int i = 0; i < HOUSE_MAX; i++)
 	{
 
-		float distance = GetDistance(player[0].pos, g_House[i].pos);
+		float distance = GetDistance(player[0].pos, house[i].pos);
 
 		//-----------------------------------------------------------------------
 		// LOD処理
 		//-----------------------------------------------------------------------
 		if (distance < DRAW_RANGE - 400)
 		{
-			g_House[i].modelNo = 0;
+			house[i].modelNo = 0;
 		}
 		else if (distance < DRAW_RANGE - 200)
 		{
-			g_House[i].modelNo = 1;
+			house[i].modelNo = 1;
 		}
 		else if (distance > DRAW_RANGE)
 		{
-			g_House[i].modelNo = 2;
+			house[i].modelNo = 2;
 		}
 
 		//-------------------------------------------------------------------------
 		// 視錐型カリング処理
 		//-------------------------------------------------------------------------		
-		g_House[i].draw = FrustumCulling(g_House[i].pos, g_House[i].rot, g_House[i].size);
+		house[i].draw = FrustumCulling(house[i].pos, house[i].rot, house[i].size);
 		
 		
 		//-------------------------------------------------------------------------
 		// エフェクトの処理(パーティクル)
 		//-------------------------------------------------------------------------
-		if (g_House[i].draw)
+		if (house[i].draw)
 		{
 			if (rand() % 1 == 0)
 			{
@@ -163,7 +163,7 @@ void UpdateHouse(void)
 				int nLife;
 				float fSize;
 
-				pos = g_House[i].pos;
+				pos = house[i].pos;
 
 				pos.y = 150.0f;
 
@@ -203,9 +203,9 @@ void DrawHouse(void)
 	for (int i = 0; i < HOUSE_MAX; i++)
 	{
 
-		if (!g_House[i].use)  continue;
+		if (!house[i].use)  continue;
 
-		if (!g_House[i].draw) continue;
+		if (!house[i].draw) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -213,26 +213,26 @@ void DrawHouse(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_House[i].scl.x, g_House[i].scl.y, g_House[i].scl.z);
+		mtxScl = XMMatrixScaling(house[i].scl.x, house[i].scl.y, house[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_House[i].rot.x, g_House[i].rot.y + XM_PI, g_House[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(house[i].rot.x, house[i].rot.y + XM_PI, house[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_House[i].pos.x, g_House[i].pos.y, g_House[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(house[i].pos.x, house[i].pos.y, house[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_House[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&house[i].mtxWorld, mtxWorld);
 
 		// モデル描画
 		
 		// LOD処理
-		switch (g_House[i].modelNo)
+		switch (house[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelHigh);
@@ -256,6 +256,6 @@ void DrawHouse(void)
 //=============================================================================
 HOUSE* GetHouse(void)
 {
-	return &g_House[0];
+	return &house[0];
 }
 

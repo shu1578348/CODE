@@ -40,32 +40,32 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ENEMY g_Enemy[ENEMY_MAX]; // エネミー構造体
-static BOOL	  g_Load = FALSE;	 // 初期化を行ったかのフラグ
+static ENEMY enemy[ENEMY_MAX]; // エネミー構造体
+static BOOL	  load = FALSE;	 // 初期化を行ったかのフラグ
 DX11_MODEL	  modelEnemy;		 // モデル情報
 
 //----------------------------------------------------------------------------
 // 線形補間
 //----------------------------------------------------------------------------
-static INTERPOLATION_DATA g_MoveTbl0[] = {
+static INTERPOLATION_DATA moveTbl0[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3(-220.0f, ENEMY_OFFSET_Y,  0.0f),	 XMFLOAT3(0.0f,  1.57f, 0.0f), 	XMFLOAT3(1.0f, 1.0f, 1.0f),	120 },
 	{ XMFLOAT3( -20.0f, ENEMY_OFFSET_Y,  0.0f),	 XMFLOAT3(0.0f, -1.57f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f),	120 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl1[] = {
+static INTERPOLATION_DATA moveTbl1[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3( -20.0f, ENEMY_OFFSET_Y,  -100.0f), XMFLOAT3(0.0f, -1.57f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f), 120 },
 	{ XMFLOAT3(-220.0f, ENEMY_OFFSET_Y,  -100.0f), XMFLOAT3(0.0f,  1.57f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f), 120 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl2[] = {
+static INTERPOLATION_DATA moveTbl2[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3(-300.0f, ENEMY_OFFSET_Y,    0.0f), XMFLOAT3(0.0f, 3.14f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f),	120 },
 	{ XMFLOAT3(-300.0f, ENEMY_OFFSET_Y, -300.0f), XMFLOAT3(0.0f, 0.0f,  0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f),	120 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl3[] = {
+static INTERPOLATION_DATA moveTbl3[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f), 150 },
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f), 150 },
@@ -73,7 +73,7 @@ static INTERPOLATION_DATA g_MoveTbl3[] = {
 	{ XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 750.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(1.0f, 1.0f, 1.0f), 150 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl4[] = {
+static INTERPOLATION_DATA moveTbl4[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 750.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
 	{ XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
@@ -81,7 +81,7 @@ static INTERPOLATION_DATA g_MoveTbl4[] = {
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 750.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl5[] = {
+static INTERPOLATION_DATA moveTbl5[] = {
 	//座標													回転率						拡大率			時間
 
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 750.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
@@ -90,7 +90,7 @@ static INTERPOLATION_DATA g_MoveTbl5[] = {
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
 };
 
-static INTERPOLATION_DATA g_MoveTbl6[] = {
+static INTERPOLATION_DATA moveTbl6[] = {
 	//座標													回転率						拡大率			時間
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
 	{ XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 750.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
@@ -98,15 +98,15 @@ static INTERPOLATION_DATA g_MoveTbl6[] = {
 	{ XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 520.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),  XMFLOAT3(0.0f, 0.0f, 0.0f), 150 },
 };
 
-static INTERPOLATION_DATA* g_MoveTblAdr[] =
+static INTERPOLATION_DATA* moveTblAdr[] =
 {
-	g_MoveTbl0,
-	g_MoveTbl1,
-	g_MoveTbl2,
-	g_MoveTbl3,
-	g_MoveTbl4,
-	g_MoveTbl5,
-	g_MoveTbl6,
+	moveTbl0,
+	moveTbl1,
+	moveTbl2,
+	moveTbl3,
+	moveTbl4,
+	moveTbl5,
+	moveTbl6,
 };
 
 int atClTime = 0;	// 攻撃間隔
@@ -121,75 +121,75 @@ HRESULT InitEnemy(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < ENEMY_MAX; i++)
 	{
-		g_Enemy[i].pos = XMFLOAT3(175.0f, ENEMY_OFFSET_Y, -30.0f);
-		g_Enemy[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_Enemy[i].scl = XMFLOAT3(1.5f, 1.5f, 1.5f);
+		enemy[i].pos = XMFLOAT3(175.0f, ENEMY_OFFSET_Y, -30.0f);
+		enemy[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		enemy[i].scl = XMFLOAT3(1.5f, 1.5f, 1.5f);
 
-		g_Enemy[i].tPos = XMFLOAT3(175.0f, ENEMY_OFFSET_Y, -30.0f);
+		enemy[i].tPos = XMFLOAT3(175.0f, ENEMY_OFFSET_Y, -30.0f);
 
-		g_Enemy[i].spd  = 0.0f;			// 移動スピードクリア
-		g_Enemy[i].size = {ENEMY_SIZE_X, ENEMY_SIZE_Y, ENEMY_SIZE_Z};	// 当たり判定の大きさ
+		enemy[i].spd  = 0.0f;			// 移動スピードクリア
+		enemy[i].size = {ENEMY_SIZE_X, ENEMY_SIZE_Y, ENEMY_SIZE_Z};	// 当たり判定の大きさ
 		
 		// ダンジョン(1階)なら
 		if (GetField() == DUNGEON_FIRST_FLOOR)
 		{
-			XMFLOAT3 pos = g_Enemy[i].pos;
+			XMFLOAT3 pos = enemy[i].pos;
 			pos.y -= (ENEMY_OFFSET_Y - 0.1f);
-			g_Enemy[i].shadowIdx = CreateShadow(pos, ENEMY_SHADOW_SIZE, ENEMY_SHADOW_SIZE);
+			enemy[i].shadowIdx = CreateShadow(pos, ENEMY_SHADOW_SIZE, ENEMY_SHADOW_SIZE);
 		}
 
-		g_Enemy[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
-		g_Enemy[i].use  = TRUE;		// TRUE:使用 / FALSE:未使用
-		g_Enemy[i].chase = FALSE;    // TRUE:追跡中 / FALSE:非追跡中
+		enemy[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
+		enemy[i].use  = TRUE;		// TRUE:使用 / FALSE:未使用
+		enemy[i].chase = FALSE;    // TRUE:追跡中 / FALSE:非追跡中
 
-		g_Enemy[i].condition = 0;	// 通常状態にする
+		enemy[i].condition = 0;	// 通常状態にする
 		
-		g_Enemy[i].hp = ENEMY_HP; // ヒットポイントの初期化
+		enemy[i].hp = ENEMY_HP; // ヒットポイントの初期化
 
-		g_Enemy[i].state = FALSE;   // TRUE:移動可能 / FALSE:移動不可
+		enemy[i].state = FALSE;   // TRUE:移動可能 / FALSE:移動不可
 		
-		g_Enemy[i].time  = 0.0f;	// 線形補間用のタイマーをクリア
-		g_Enemy[i].tblNo = 0;		// 再生する行動データテーブルNoをセット
-		g_Enemy[i].tblMax = sizeof(g_MoveTbl0) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[i].time  = 0.0f;	// 線形補間用のタイマーをクリア
+		enemy[i].tblNo = 0;		// 再生する行動データテーブルNoをセット
+		enemy[i].tblMax = sizeof(moveTbl0) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 	}
 	//-------------------------------------------------------------------------
 	// 初期位置の設定
 	//-------------------------------------------------------------------------
 	{
-		g_Enemy[0].pos = XMFLOAT3(-220.0f, ENEMY_OFFSET_Y, -0.0f);
-		g_Enemy[1].pos = XMFLOAT3(-120.0f, ENEMY_OFFSET_Y, -100.0f);
-		g_Enemy[2].pos = XMFLOAT3(-300.0f, ENEMY_OFFSET_Y, 0.0f);
-		g_Enemy[3].pos = XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 520.0f);
-		g_Enemy[4].pos = XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 750.0f);
-		g_Enemy[5].pos = XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 750.0f);
-		g_Enemy[6].pos = XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 520.0f);
+		enemy[0].pos = XMFLOAT3(-220.0f, ENEMY_OFFSET_Y, -0.0f);
+		enemy[1].pos = XMFLOAT3(-120.0f, ENEMY_OFFSET_Y, -100.0f);
+		enemy[2].pos = XMFLOAT3(-300.0f, ENEMY_OFFSET_Y, 0.0f);
+		enemy[3].pos = XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 520.0f);
+		enemy[4].pos = XMFLOAT3(-620.0f, ENEMY_OFFSET_Y, 750.0f);
+		enemy[5].pos = XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 750.0f);
+		enemy[6].pos = XMFLOAT3(-380.0f, ENEMY_OFFSET_Y, 520.0f);
 	}
 
 	//-------------------------------------------------------------------------
 	// 行動テーブルのセット
 	//-------------------------------------------------------------------------
 	{
-		g_Enemy[0].tblNo = 0;		// 再生する行動データテーブルNoをセット
-		g_Enemy[0].tblMax = sizeof(g_MoveTbl0) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[0].tblNo = 0;		// 再生する行動データテーブルNoをセット
+		enemy[0].tblMax = sizeof(moveTbl0) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[1].tblNo = 1;		// 再生する行動データテーブルNoをセット
-		g_Enemy[1].tblMax = sizeof(g_MoveTbl1) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[1].tblNo = 1;		// 再生する行動データテーブルNoをセット
+		enemy[1].tblMax = sizeof(moveTbl1) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[2].tblNo = 2;		// 再生する行動データテーブルNoをセット
-		g_Enemy[2].tblMax = sizeof(g_MoveTbl2) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[2].tblNo = 2;		// 再生する行動データテーブルNoをセット
+		enemy[2].tblMax = sizeof(moveTbl2) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[3].tblNo = 3;		// 再生する行動データテーブルNoをセット
-		g_Enemy[3].tblMax = sizeof(g_MoveTbl3) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[3].tblNo = 3;		// 再生する行動データテーブルNoをセット
+		enemy[3].tblMax = sizeof(moveTbl3) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[4].tblNo = 4;		// 再生する行動データテーブルNoをセット
-		g_Enemy[4].tblMax = sizeof(g_MoveTbl4) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[4].tblNo = 4;		// 再生する行動データテーブルNoをセット
+		enemy[4].tblMax = sizeof(moveTbl4) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[5].tblNo = 5;		// 再生する行動データテーブルNoをセット
-		g_Enemy[5].tblMax = sizeof(g_MoveTbl5) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[5].tblNo = 5;		// 再生する行動データテーブルNoをセット
+		enemy[5].tblMax = sizeof(moveTbl5) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
-		g_Enemy[6].tblNo = 6;		// 再生する行動データテーブルNoをセット
-		g_Enemy[6].tblMax = sizeof(g_MoveTbl6) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+		enemy[6].tblNo = 6;		// 再生する行動データテーブルNoをセット
+		enemy[6].tblMax = sizeof(moveTbl6) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 	}
 
@@ -197,7 +197,7 @@ HRESULT InitEnemy(void)
 	// モデル読み込み
 	//-------------------------------------------------------------------------
 	{
-		g_Load = TRUE;
+		load = TRUE;
 
 		// モデルの読み込み
 		LoadModel(MODEL_ENEMY, &modelEnemy);
@@ -211,10 +211,10 @@ HRESULT InitEnemy(void)
 //=============================================================================
 void UninitEnemy(void)
 {
-	if (g_Load)
+	if (load)
 	{
 		UnloadModel(&modelEnemy);
-		g_Load = FALSE;
+		load = FALSE;
 	}
 }
 
@@ -233,21 +233,21 @@ void UpdateEnemy(void)
 	for (int i = 0; i < ENEMY_MAX; i++)
 	{
 
-		if (g_Enemy[i].use)	  // 使用判定
+		if (enemy[i].use)	  // 使用判定
 		{
 			// 移動前の座標を保存
-			XMFLOAT3 oldPos = g_Enemy[i].pos;
+			XMFLOAT3 oldPos = enemy[i].pos;
 						
 			// 影もプレイヤーの位置に合わせる
-			XMFLOAT3 pos = g_Enemy[i].pos;
+			XMFLOAT3 pos = enemy[i].pos;
 			pos.y -= (ENEMY_OFFSET_Y - 0.1f);
-			SetPositionShadow(g_Enemy[i].shadowIdx, pos);
+			SetPositionShadow(enemy[i].shadowIdx, pos);
 
 			//-------------------------------------------------------------------------
 			// 視錐台カリング
 			//-------------------------------------------------------------------------
 			{
-				g_Enemy[i].draw = FrustumCulling(g_Enemy[i].pos, g_Enemy[i].rot, g_Enemy[i].size);
+				enemy[i].draw = FrustumCulling(enemy[i].pos, enemy[i].rot, enemy[i].size);
 			}
 
 			//-------------------------------------------------------------------------
@@ -255,68 +255,68 @@ void UpdateEnemy(void)
 			//-------------------------------------------------------------------------
 			{
 
-				float distance = GetDistance(player[0].pos, g_Enemy[i].pos);
+				float distance = GetDistance(player[0].pos, enemy[i].pos);
 
 				// 近づいたら追跡する
 				if (distance < 100)
 				{
-					g_Enemy[i].chase = TRUE;
+					enemy[i].chase = TRUE;
 				}
 				else
 				{
-					g_Enemy[i].chase = FALSE;
+					enemy[i].chase = FALSE;
 				}
 
 				// ダメージを受けたらプレイヤーを追跡する
-				if (g_Enemy[i].hp != ENEMY_HP)
+				if (enemy[i].hp != ENEMY_HP)
 				{
-					g_Enemy[i].chase = TRUE;
+					enemy[i].chase = TRUE;
 				}
 
-				if (g_Enemy[i].chase)
+				if (enemy[i].chase)
 				{
-					g_Enemy[i].tPos = player[0].pos;
+					enemy[i].tPos = player[0].pos;
 				}
 
-				if (!g_Enemy[i].chase)
+				if (!enemy[i].chase)
 				{
 					// 線形補間の処理
 					{
-						int nowNo = (int)g_Enemy[i].time;			// 整数分であるテーブル番号を取り出している
-						int maxNo = g_Enemy[i].tblMax;				// 登録テーブル数を数えている
+						int nowNo = (int)enemy[i].time;			// 整数分であるテーブル番号を取り出している
+						int maxNo = enemy[i].tblMax;				// 登録テーブル数を数えている
 						int nextNo = (nowNo + 1) % maxNo;			// 移動先テーブルの番号を求めている
-						INTERPOLATION_DATA* tbl = g_MoveTblAdr[g_Enemy[i].tblNo];	// 行動テーブルのアドレスを取得
+						INTERPOLATION_DATA* tbl = moveTblAdr[enemy[i].tblNo];	// 行動テーブルのアドレスを取得
 
 						XMVECTOR nowPos = XMLoadFloat3(&tbl[nowNo].pos);	// XMVECTORへ変換
 
 						XMVECTOR Pos = XMLoadFloat3(&tbl[nextNo].pos) - nowPos;	// XYZ移動量を計算している
-						float nowTime = g_Enemy[i].time - nowNo;	// 時間部分である少数を取り出している
+						float nowTime = enemy[i].time - nowNo;	// 時間部分である少数を取り出している
 
 						Pos *= nowTime;		// 現在の移動量を計算している
 
 						// 計算して求めた移動量を現在の移動テーブルXYZに足している＝表示座標を求めている
-						XMStoreFloat3(&g_Enemy[i].tPos, nowPos + Pos);
+						XMStoreFloat3(&enemy[i].tPos, nowPos + Pos);
 
 						// frameを使て時間経過処理をする
-						g_Enemy[i].time += 1.0f / tbl[nowNo].frame;	// 時間を進めている
-						if ((int)g_Enemy[i].time >= maxNo)			// 登録テーブル最後まで移動したか？
+						enemy[i].time += 1.0f / tbl[nowNo].frame;	// 時間を進めている
+						if ((int)enemy[i].time >= maxNo)			// 登録テーブル最後まで移動したか？
 						{
-							g_Enemy[i].time -= maxNo;				// ０番目にリセットしつつも小数部分を引き継いでいる
+							enemy[i].time -= maxNo;				// ０番目にリセットしつつも小数部分を引き継いでいる
 						}
 					}
 				}
 
 				// 敵の移動速度
-				g_Enemy[i].spd = VALUE_MOVE;
+				enemy[i].spd = VALUE_MOVE;
 
-				XMVECTOR epos = XMLoadFloat3(&g_Enemy[i].pos);
-				XMVECTOR vec = XMLoadFloat3(&g_Enemy[i].tPos) - epos;                   //エネミーとプレイヤーの差分を求めている
+				XMVECTOR epos = XMLoadFloat3(&enemy[i].pos);
+				XMVECTOR vec = XMLoadFloat3(&enemy[i].tPos) - epos;                   //エネミーとプレイヤーの差分を求めている
 
 				// 目標の方向
 				const float targetDir = static_cast<float>(atan2(vec.m128_f32[0], vec.m128_f32[2]) - XM_PI);;
 
 				// 現在の方向から目標の方向への角度差を求める
-				float angleDifference = targetDir - g_Enemy[i].rot.y;
+				float angleDifference = targetDir - enemy[i].rot.y;
 
 				// 角度差を正確な範囲に調整
 				while (angleDifference > XM_PI)
@@ -330,13 +330,13 @@ void UpdateEnemy(void)
 				}
 
 				// 補間を使用してg_Player.dirを目標の方向に近づける
-				g_Enemy[i].rot.y = Lerp(g_Enemy[i].rot.y, g_Enemy[i].rot.y + angleDifference, VALUE_ROTATE);
+				enemy[i].rot.y = Lerp(enemy[i].rot.y, enemy[i].rot.y + angleDifference, VALUE_ROTATE);
 
 				// プレイヤーの方に移動
-				g_Enemy[i].pos.x -= sinf(g_Enemy[i].rot.y) * g_Enemy[i].spd;
-				g_Enemy[i].pos.z -= cosf(g_Enemy[i].rot.y) * g_Enemy[i].spd;
+				enemy[i].pos.x -= sinf(enemy[i].rot.y) * enemy[i].spd;
+				enemy[i].pos.z -= cosf(enemy[i].rot.y) * enemy[i].spd;
 
-				g_Enemy[i].spd *= 0.0f;
+				enemy[i].spd *= 0.0f;
 
 			}
 			//-------------------------------------------------------------------------
@@ -352,7 +352,7 @@ void UpdateEnemy(void)
 
 					if (player[j].use)
 					{
-						if (CollisionBC(g_Enemy[i].pos, player[j].pos, ENEMY_SIZE, player[j].size))
+						if (CollisionBC(enemy[i].pos, player[j].pos, ENEMY_SIZE, player[j].size))
 						{
 
 							if (atClTime >= 120)
@@ -362,7 +362,7 @@ void UpdateEnemy(void)
 								atClTime = 0;
 							}
 
-							g_Enemy[i].pos = oldPos;
+							enemy[i].pos = oldPos;
 
 							break;
 						}
@@ -376,12 +376,12 @@ void UpdateEnemy(void)
 					{
 						if (bomb[k].use == TRUE)
 						{
-							BOOL ans = CollisionBC(g_Enemy[k].pos, bomb[k].pos, 10.0f, 10.0f);
+							BOOL ans = CollisionBC(enemy[k].pos, bomb[k].pos, 10.0f, 10.0f);
 
 							if (ans == TRUE)
 							{
 								// ポジションをもとに戻す
-								g_Enemy[k].pos = oldPos;
+								enemy[k].pos = oldPos;
 
 								break;
 							}
@@ -390,9 +390,9 @@ void UpdateEnemy(void)
 				}
 
 				// フィールドとの当たり判定
-				if (FieldHit(g_Enemy[i].pos, oldPos))
+				if (FieldHit(enemy[i].pos, oldPos))
 				{
-					g_Enemy[i].pos = oldPos;
+					enemy[i].pos = oldPos;
 				}
 
 			}
@@ -403,10 +403,10 @@ void UpdateEnemy(void)
 			{
 
 				// 描画範囲内かどうか
-				if (g_Enemy[i].draw)
+				if (enemy[i].draw)
 				{
 					// 状態異常
-					switch (g_Enemy[i].condition)
+					switch (enemy[i].condition)
 					{
 					case 0: // 通常
 						break;
@@ -414,7 +414,7 @@ void UpdateEnemy(void)
 					case 1: // 炎上
 
 						// HPを減らす
-						g_Enemy[i].hp -= 1.0f;
+						enemy[i].hp -= 1.0f;
 
 						XMFLOAT3 pos;
 						XMFLOAT3 move;
@@ -423,7 +423,7 @@ void UpdateEnemy(void)
 						int nLife;
 						float fSize;
 
-						pos = g_Enemy[i].pos;
+						pos = enemy[i].pos;
 
 						pos.y += 6.0f;
 
@@ -448,9 +448,9 @@ void UpdateEnemy(void)
 					case 2: // 毒
 
 						// HPを減らす
-						g_Enemy[i].hp -= 2.0f;
+						enemy[i].hp -= 2.0f;
 
-						pos = g_Enemy[i].pos;
+						pos = enemy[i].pos;
 
 						pos.y += 12.0f;
 
@@ -479,11 +479,11 @@ void UpdateEnemy(void)
 			// 死亡判定処理
 			//-------------------------------------------------------------------------
 			{
-				if (g_Enemy[i].hp <= 0)
+				if (enemy[i].hp <= 0)
 				{
 					AddScore(100);
 
-					g_Enemy[i].use = FALSE;
+					enemy[i].use = FALSE;
 				}
 			}
 		
@@ -510,32 +510,32 @@ void DrawEnemy(void)
 	for (int i = 0; i < ENEMY_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Enemy[i].use)  continue;
+		if (!enemy[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Enemy[i].draw) continue;
+		if (!enemy[i].draw) continue;
 
 		// ワールドマトリックスの初期化
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Enemy[i].scl.x, g_Enemy[i].scl.y, g_Enemy[i].scl.z);
+		mtxScl = XMMatrixScaling(enemy[i].scl.x, enemy[i].scl.y, enemy[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Enemy[i].rot.x, g_Enemy[i].rot.y + XM_PI, g_Enemy[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(enemy[i].rot.x, enemy[i].rot.y + XM_PI, enemy[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Enemy[i].pos.x, g_Enemy[i].pos.y, g_Enemy[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(enemy[i].pos.x, enemy[i].pos.y, enemy[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Enemy[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&enemy[i].mtxWorld, mtxWorld);
 
-		switch (g_Enemy[i].modelNo)
+		switch (enemy[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelEnemy);
@@ -553,5 +553,5 @@ void DrawEnemy(void)
 //=============================================================================
 ENEMY* GetEnemy()
 {
-	return &g_Enemy[0];
+	return &enemy[0];
 }

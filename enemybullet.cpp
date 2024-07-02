@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // 弾発射処理 [enemybullet.cpp]
-// Author : 
+// Author : 荒山 秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -36,8 +36,8 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ENEMYBULLET g_EnemyBullet[ENEMY_BULLET_MAX];	 // エネミーバレット構造体
-static BOOL	  g_Load = FALSE;						 // 初期化を行ったかのフラグ
+static ENEMYBULLET enemyBullet[ENEMY_BULLET_MAX];	 // エネミーバレット構造体
+static BOOL	  load = FALSE;						 // 初期化を行ったかのフラグ
 
 //=============================================================================
 // 初期化処理
@@ -49,17 +49,17 @@ HRESULT InitEnemyBullet(void)
 	//-------------------------------------------------------------------------
 	for (int nCntBullet = 0; nCntBullet < BULLET_MAX; nCntBullet++)
 	{
-		g_EnemyBullet[nCntBullet].pos = { 0.0f, 0.0f, 0.0f };
-		g_EnemyBullet[nCntBullet].rot = { 0.0f, 0.0f, 0.0f };
-		g_EnemyBullet[nCntBullet].scl = { 1.0f, 1.0f, 1.0f };
+		enemyBullet[nCntBullet].pos = { 0.0f, 0.0f, 0.0f };
+		enemyBullet[nCntBullet].rot = { 0.0f, 0.0f, 0.0f };
+		enemyBullet[nCntBullet].scl = { 1.0f, 1.0f, 1.0f };
 
-		g_EnemyBullet[nCntBullet].spd = 0.0f;
+		enemyBullet[nCntBullet].spd = 0.0f;
 
-		g_EnemyBullet[nCntBullet].size = BULLET_SIZE; // 当たり判定の大きさ
+		enemyBullet[nCntBullet].size = BULLET_SIZE; // 当たり判定の大きさ
 
-		g_EnemyBullet[nCntBullet].type = 1; // 0:通常弾 / 1:火炎弾 / 2:毒弾
+		enemyBullet[nCntBullet].type = 1; // 0:通常弾 / 1:火炎弾 / 2:毒弾
 
-		g_EnemyBullet[nCntBullet].use  = FALSE;	// TRUE:使用 / FALSE:未使用
+		enemyBullet[nCntBullet].use  = FALSE;	// TRUE:使用 / FALSE:未使用
 	}
 
 	return S_OK;
@@ -93,7 +93,7 @@ void UpdateEnemyBullet(void)
 
 	for (int i = 0; i < BULLET_MAX; i++)
 	{
-		if (g_EnemyBullet[i].use)
+		if (enemyBullet[i].use)
 		{
 
 			//-------------------------------------------------------------------------
@@ -102,22 +102,22 @@ void UpdateEnemyBullet(void)
 			{
 
 				// 移動前の座標を保存
-				oldPos = g_EnemyBullet[i].pos;
+				oldPos = enemyBullet[i].pos;
 				
 				// 弾の移動処理
-				g_EnemyBullet[i].pos.x -= sinf(g_EnemyBullet[i].rot.y) * g_EnemyBullet[i].spd;
-				g_EnemyBullet[i].pos.z -= cosf(g_EnemyBullet[i].rot.y) * g_EnemyBullet[i].spd;
+				enemyBullet[i].pos.x -= sinf(enemyBullet[i].rot.y) * enemyBullet[i].spd;
+				enemyBullet[i].pos.z -= cosf(enemyBullet[i].rot.y) * enemyBullet[i].spd;
 
 				// 減速処理
-				g_EnemyBullet[i].spd *= 0.997f;
+				enemyBullet[i].spd *= 0.997f;
 
-				g_EnemyBullet[i].dTime -= 1;
+				enemyBullet[i].dTime -= 1;
 
 				// 一定時間経つと消える
-				if (g_EnemyBullet[i].dTime < 0)
+				if (enemyBullet[i].dTime < 0)
 				{
-					g_EnemyBullet[i].use = FALSE;
-					ReleaseShadow(g_EnemyBullet[i].shadowIdx);
+					enemyBullet[i].use = FALSE;
+					ReleaseShadow(enemyBullet[i].shadowIdx);
 				}
 
 			}
@@ -127,7 +127,7 @@ void UpdateEnemyBullet(void)
 			//-------------------------------------------------------------------------
 			{
 
-				pos = g_EnemyBullet[i].pos;
+				pos = enemyBullet[i].pos;
 
 				scale = { 0.3f, 0.3f, 0.3f };
 
@@ -143,7 +143,7 @@ void UpdateEnemyBullet(void)
 				fSize = (float)(rand() % 30 + 10);
 
 				// ビルボードの設定
-				SetParticle(g_EnemyBullet[i].pos, pos, move, scale, XMFLOAT4(0.0f, 0.3f, 1.0f, 0.85f), fSize, fSize, nLife, 0);
+				SetParticle(enemyBullet[i].pos, pos, move, scale, XMFLOAT4(0.0f, 0.3f, 1.0f, 0.85f), fSize, fSize, nLife, 0);
 
 			}
 
@@ -155,20 +155,20 @@ void UpdateEnemyBullet(void)
 				if (player[0].use)
 				{
 
-					if (CollisionBC(player[0].pos, g_EnemyBullet[i].pos, player[0].size, g_EnemyBullet[i].size))
+					if (CollisionBC(player[0].pos, enemyBullet[i].pos, player[0].size, enemyBullet[i].size))
 					{
 						// 当たったら消える
-						g_EnemyBullet[i].use = FALSE;
+						enemyBullet[i].use = FALSE;
 
 						// エネミーのHPを減らす
 						player[0].hp -= 5;
 
-						ReleaseShadow(g_EnemyBullet[i].shadowIdx);
+						ReleaseShadow(enemyBullet[i].shadowIdx);
 
 						// 接触エフェクト
 						for (int j = 0; j < 20; j++)
 						{
-							pos = g_EnemyBullet[i].pos;
+							pos = enemyBullet[i].pos;
 
 							scale = { 0.3f, 0.3f, 0.3f };
 
@@ -179,15 +179,15 @@ void UpdateEnemyBullet(void)
 							move.y = (100.0f - rand() % 200) * 0.01f;
 							move.z = cosf(fAngle) * fLength;
 
-							move.x -= sinf(g_EnemyBullet[i].rot.y);
-							move.z -= cosf(g_EnemyBullet[i].rot.y);
+							move.x -= sinf(enemyBullet[i].rot.y);
+							move.z -= cosf(enemyBullet[i].rot.y);
 
 							nLife = rand() % 80 + 50;
 
 							fSize = (float)(rand() % 30 + 10);
 
 							// ビルボードの設定
-							SetParticle(g_EnemyBullet[i].pos, pos, move, scale, XMFLOAT4(0.0f, 0.3f, 1.0f, 0.85f), fSize, fSize, nLife, 0);
+							SetParticle(enemyBullet[i].pos, pos, move, scale, XMFLOAT4(0.0f, 0.3f, 1.0f, 0.85f), fSize, fSize, nLife, 0);
 						}
 
 					}
@@ -196,9 +196,9 @@ void UpdateEnemyBullet(void)
 
 			}
 
-			if (FieldHit(g_EnemyBullet[i].pos, oldPos))
+			if (FieldHit(enemyBullet[i].pos, oldPos))
 			{
-				g_EnemyBullet[i].use = FALSE;
+				enemyBullet[i].use = FALSE;
 
 			}
 
@@ -227,26 +227,26 @@ void SetEnemyBullet(XMFLOAT3 pos, XMFLOAT3 rot,int type)
 	// もし未使用の弾が無かったら発射しない( =これ以上撃てないって事 )
 	for (int nCntBullet = 0; nCntBullet < BULLET_MAX; nCntBullet++)
 	{
-		if (!g_EnemyBullet[nCntBullet].use)	// 未使用状態のバレットを見つける
+		if (!enemyBullet[nCntBullet].use)	// 未使用状態のバレットを見つける
 		{
 			float len;
 
 			len = (20.0f - rand() % 40) * 0.02f;
 
-			g_EnemyBullet[nCntBullet].spd = ENEMY_BULLET_SPEED;
+			enemyBullet[nCntBullet].spd = ENEMY_BULLET_SPEED;
 
-			g_EnemyBullet[nCntBullet].pos = XMFLOAT3(pos.x, 20.0f, pos.z);	// 座標をセット
-			g_EnemyBullet[nCntBullet].rot  = rot;							// 回転をセット
-			g_EnemyBullet[nCntBullet].rot.y += len;							// 回転をセット
-			g_EnemyBullet[nCntBullet].use = TRUE;							// 使用状態へ変更する	
+			enemyBullet[nCntBullet].pos = XMFLOAT3(pos.x, 20.0f, pos.z);	// 座標をセット
+			enemyBullet[nCntBullet].rot  = rot;							// 回転をセット
+			enemyBullet[nCntBullet].rot.y += len;							// 回転をセット
+			enemyBullet[nCntBullet].use = TRUE;							// 使用状態へ変更する	
 
-			g_EnemyBullet[nCntBullet].dTime = ENEMY_BULLET_DELETE;			// 消えるまでの時間
-			g_EnemyBullet[nCntBullet].scl = { 0.2f, 0.2f, 0.2f };			// サイズをもとに戻す
+			enemyBullet[nCntBullet].dTime = ENEMY_BULLET_DELETE;			// 消えるまでの時間
+			enemyBullet[nCntBullet].scl = { 0.2f, 0.2f, 0.2f };			// サイズをもとに戻す
 
-			g_EnemyBullet[nCntBullet].type = type;							// 弾の種類
+			enemyBullet[nCntBullet].type = type;							// 弾の種類
 
 			// 影の設定
-			g_EnemyBullet[nCntBullet].shadowIdx = CreateShadow(g_EnemyBullet[nCntBullet].pos, 0.2f, 0.2f);
+			enemyBullet[nCntBullet].shadowIdx = CreateShadow(enemyBullet[nCntBullet].pos, 0.2f, 0.2f);
 
 			nIdxBullet = nCntBullet;
 
@@ -261,7 +261,7 @@ void SetEnemyBullet(XMFLOAT3 pos, XMFLOAT3 rot,int type)
 //=============================================================================
 ENEMYBULLET* GetEnemyBullet(void)
 {
-	return &g_EnemyBullet[0];
+	return &enemyBullet[0];
 }
 
 //=============================================================================

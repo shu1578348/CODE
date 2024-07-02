@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // モデル処理 [carriage.cpp]
-// Author : 
+// Author : 荒山 秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -30,7 +30,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static CARRIAGE	g_Carriage[CARRIAGE_MAX];			 // 屋台の最大数
+static CARRIAGE	carriage[CARRIAGE_MAX];			 // 屋台の最大数
 
 //=============================================================================
 // 初期化処理
@@ -40,22 +40,22 @@ HRESULT InitCarriage(void)
 
 	for (int i = 0; i < CARRIAGE_MAX; i++)
 	{
-		LoadModel(MODEL_CARRIAGE, &g_Carriage[i].model);
-		g_Carriage[i].load = TRUE;
+		LoadModel(MODEL_CARRIAGE, &carriage[i].model);
+		carriage[i].load = TRUE;
 
-		g_Carriage[i].rot  = { 0.0f, 0.0f, 0.0f };
-		g_Carriage[i].scl  = { 0.6f, 0.6f, 0.6f };
-		g_Carriage[i].size = { CARRIAGE_SIZE_X, CARRIAGE_SIZE_Y, CARRIAGE_SIZE_Z };
+		carriage[i].rot  = { 0.0f, 0.0f, 0.0f };
+		carriage[i].scl  = { 0.6f, 0.6f, 0.6f };
+		carriage[i].size = { CARRIAGE_SIZE_X, CARRIAGE_SIZE_Y, CARRIAGE_SIZE_Z };
 
-		g_Carriage[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
-		g_Carriage[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
+		carriage[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
+		carriage[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
 
 	}
 
 	// 屋台の表示位置
 	{
-		g_Carriage[0].pos = { -400.0f, CARRIAGE_OFFSET_Y,  5.0f };
-		g_Carriage[0].rot = { 0.0f, 240.0f, 0.0f };
+		carriage[0].pos = { -400.0f, CARRIAGE_OFFSET_Y,  5.0f };
+		carriage[0].rot = { 0.0f, 240.0f, 0.0f };
 	}
 
 	return S_OK;
@@ -69,11 +69,11 @@ void UninitCarriage(void)
 	for (int i = 0; i < CARRIAGE_MAX; i++)
 	{
 		// モデルの解放処理
-		if (g_Carriage[i].load)
+		if (carriage[i].load)
 		{
-			UnloadModel(&g_Carriage[i].model);
+			UnloadModel(&carriage[i].model);
 
-			g_Carriage[i].load = FALSE;
+			carriage[i].load = FALSE;
 		}
 	}
 }
@@ -88,7 +88,7 @@ void UpdateCarriage(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < CARRIAGE_MAX; i++)
 	{
-		g_Carriage[i].draw = FrustumCulling(g_Carriage[i].pos,g_Carriage[i].rot, g_Carriage[i].size);
+		carriage[i].draw = FrustumCulling(carriage[i].pos,carriage[i].rot, carriage[i].size);
 	}
 
 }
@@ -102,10 +102,10 @@ void DrawCarriage(void)
 	for (int i = 0; i < CARRIAGE_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Carriage[i].use)  continue;
+		if (!carriage[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Carriage[i].draw) continue;
+		if (!carriage[i].draw) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -113,24 +113,24 @@ void DrawCarriage(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Carriage[i].scl.x, g_Carriage[i].scl.y, g_Carriage[i].scl.z);
+		mtxScl = XMMatrixScaling(carriage[i].scl.x, carriage[i].scl.y, carriage[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Carriage[i].rot.x, g_Carriage[i].rot.y + XM_PI, g_Carriage[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(carriage[i].rot.x, carriage[i].rot.y + XM_PI, carriage[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Carriage[i].pos.x, g_Carriage[i].pos.y, g_Carriage[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(carriage[i].pos.x, carriage[i].pos.y, carriage[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Carriage[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&carriage[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		DrawModel(&g_Carriage[i].model);
+		DrawModel(&carriage[i].model);
 
 	}
 
@@ -141,5 +141,5 @@ void DrawCarriage(void)
 //=============================================================================
 CARRIAGE* GetCarriage(void)
 {
-	return &g_Carriage[0];
+	return &carriage[0];
 }

@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // モデル処理 [fence.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -30,8 +30,8 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static FENCE g_Fence[FENCE_MAX]; // 柵の最大数
-static BOOL	g_Load = FALSE;		 // モデルの初期化フラグ
+static FENCE fence[FENCE_MAX]; // 柵の最大数
+static BOOL	load = FALSE;		 // モデルの初期化フラグ
 DX11_MODEL modelFence;			 // モデル情報
 
 //=============================================================================
@@ -44,21 +44,21 @@ HRESULT InitFence(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < FENCE_MAX; i++)
 	{		
-		g_Fence[i].rot  = { 0.0f, 0.0f, 0.0f };
-		g_Fence[i].scl  = { 0.8f, 0.5f, 0.8f };
-		g_Fence[i].size = { FENCE_SIZE_X, FENCE_SIZE_Y, FENCE_SIZE_Z };
+		fence[i].rot  = { 0.0f, 0.0f, 0.0f };
+		fence[i].scl  = { 0.8f, 0.5f, 0.8f };
+		fence[i].size = { FENCE_SIZE_X, FENCE_SIZE_Y, FENCE_SIZE_Z };
 
-		g_Fence[i].modelNo = 0;
+		fence[i].modelNo = 0;
 
-		g_Fence[i].draw = TRUE;	// TRUE:表示 / FALSE:非表示
-		g_Fence[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
+		fence[i].draw = TRUE;	// TRUE:表示 / FALSE:非表示
+		fence[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
 	}
 
 	//-------------------------------------------------------------------------
 	//　モデルの読み込み
 	//-------------------------------------------------------------------------
 	{
-		g_Load = TRUE;
+		load = TRUE;
 
 		// モデルの読み込み
 		LoadModel(MODEL_FENCE, &modelFence);
@@ -72,83 +72,83 @@ HRESULT InitFence(void)
 		// house[0]の周囲
 		{
 
-			g_Fence[0].pos = { -160.0f, FENCE_OFFSET_Y, 100.0f };
-			g_Fence[0].rot = { 0.0f, 0.0f, 0.0f };
+			fence[0].pos = { -160.0f, FENCE_OFFSET_Y, 100.0f };
+			fence[0].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[1].pos = { -120.0f, FENCE_OFFSET_Y, 100.0f };
-			g_Fence[1].rot = { 0.0f, 0.0f, 0.0f };
+			fence[1].pos = { -120.0f, FENCE_OFFSET_Y, 100.0f };
+			fence[1].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[2].pos = { -80.0f, FENCE_OFFSET_Y,  100.0f };
-			g_Fence[2].rot = { 0.0f, 0.0f, 0.0f };
+			fence[2].pos = { -80.0f, FENCE_OFFSET_Y,  100.0f };
+			fence[2].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[3].pos = { -63.0f, FENCE_OFFSET_Y,  115.0f };
-			g_Fence[3].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[3].pos = { -63.0f, FENCE_OFFSET_Y,  115.0f };
+			fence[3].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[4].pos = { -63.0f, FENCE_OFFSET_Y,  155.0f };
-			g_Fence[4].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[4].pos = { -63.0f, FENCE_OFFSET_Y,  155.0f };
+			fence[4].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[5].pos = { -63.0f, FENCE_OFFSET_Y,  195.0f };
-			g_Fence[5].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[5].pos = { -63.0f, FENCE_OFFSET_Y,  195.0f };
+			fence[5].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[6].pos = { -63.0f, FENCE_OFFSET_Y,  235.0f };
-			g_Fence[6].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[6].pos = { -63.0f, FENCE_OFFSET_Y,  235.0f };
+			fence[6].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[7].pos = { -63.0f, FENCE_OFFSET_Y,  275.0f };
-			g_Fence[7].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[7].pos = { -63.0f, FENCE_OFFSET_Y,  275.0f };
+			fence[7].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[8].pos = { -63.0f, FENCE_OFFSET_Y,  315.0f };
-			g_Fence[8].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[8].pos = { -63.0f, FENCE_OFFSET_Y,  315.0f };
+			fence[8].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[9].pos = { -63.0f, FENCE_OFFSET_Y,  355.0f };
-			g_Fence[9].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[9].pos = { -63.0f, FENCE_OFFSET_Y,  355.0f };
+			fence[9].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[10].pos = { -80.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[10].rot = { 0.0f, 0.0f, 0.0f };
+			fence[10].pos = { -80.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[10].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[11].pos = { -120.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[11].rot = { 0.0f, 0.0f, 0.0f };
+			fence[11].pos = { -120.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[11].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[12].pos = { -160.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[12].rot = { 0.0f, 0.0f, 0.0f };
+			fence[12].pos = { -160.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[12].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[13].pos = { -200.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[13].rot = { 0.0f, 0.0f, 0.0f };
+			fence[13].pos = { -200.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[13].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[14].pos = { -240.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[14].rot = { 0.0f, 0.0f, 0.0f };
+			fence[14].pos = { -240.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[14].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[15].pos = { -280.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[15].rot = { 0.0f, 0.0f, 0.0f };
+			fence[15].pos = { -280.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[15].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[16].pos = { -320.0f, FENCE_OFFSET_Y, 377.0f };
-			g_Fence[16].rot = { 0.0f, 0.0f, 0.0f };
+			fence[16].pos = { -320.0f, FENCE_OFFSET_Y, 377.0f };
+			fence[16].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[17].pos = { -345.0f, FENCE_OFFSET_Y, 355.0f };
-			g_Fence[17].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[17].pos = { -345.0f, FENCE_OFFSET_Y, 355.0f };
+			fence[17].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[18].pos = { -345.0f, FENCE_OFFSET_Y, 315.0f };
-			g_Fence[18].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[18].pos = { -345.0f, FENCE_OFFSET_Y, 315.0f };
+			fence[18].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[19].pos = { -345.0f, FENCE_OFFSET_Y, 275.0f };
-			g_Fence[19].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[19].pos = { -345.0f, FENCE_OFFSET_Y, 275.0f };
+			fence[19].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[20].pos = { -345.0f, FENCE_OFFSET_Y, 235.0f };
-			g_Fence[20].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[20].pos = { -345.0f, FENCE_OFFSET_Y, 235.0f };
+			fence[20].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[21].pos = { -345.0f, FENCE_OFFSET_Y, 195.0f };
-			g_Fence[21].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[21].pos = { -345.0f, FENCE_OFFSET_Y, 195.0f };
+			fence[21].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[22].pos = { -345.0f, FENCE_OFFSET_Y, 155.0f };
-			g_Fence[22].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[22].pos = { -345.0f, FENCE_OFFSET_Y, 155.0f };
+			fence[22].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[23].pos = { -345.0f, FENCE_OFFSET_Y, 115.0f };
-			g_Fence[23].rot = { 0.0f, XM_PI / 2 , 0.0f };
+			fence[23].pos = { -345.0f, FENCE_OFFSET_Y, 115.0f };
+			fence[23].rot = { 0.0f, XM_PI / 2 , 0.0f };
 
-			g_Fence[24].pos = { -320.0f, FENCE_OFFSET_Y, 100.0f };
-			g_Fence[24].rot = { 0.0f, 0.0f, 0.0f };
+			fence[24].pos = { -320.0f, FENCE_OFFSET_Y, 100.0f };
+			fence[24].rot = { 0.0f, 0.0f, 0.0f };
 
-			g_Fence[25].pos = { -280.0f, FENCE_OFFSET_Y, 100.0f };
-			g_Fence[25].rot = { 0.0f, 0.0f, 0.0f };
+			fence[25].pos = { -280.0f, FENCE_OFFSET_Y, 100.0f };
+			fence[25].rot = { 0.0f, 0.0f, 0.0f };
 
 		}
 
@@ -165,11 +165,11 @@ void UninitFence(void)
 	//-------------------------------------------------------------------------
 	//　モデルの開放
 	//-------------------------------------------------------------------------
-	if (g_Load)
+	if (load)
 	{
 		UnloadModel(&modelFence);
 
-		g_Load = FALSE;
+		load = FALSE;
 	}
 }
 
@@ -184,7 +184,7 @@ void UpdateFence(void)
 	for (int i = 0; i < FENCE_MAX; i++)
 	{
 		
-		g_Fence[i].draw = FrustumCulling(g_Fence[i].pos, g_Fence[i].rot, g_Fence[i].size);
+		fence[i].draw = FrustumCulling(fence[i].pos, fence[i].rot, fence[i].size);
 		
 	}
 
@@ -199,10 +199,10 @@ void DrawFence(void)
 	for (int i = 0; i < FENCE_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Fence[i].use)  continue;
+		if (!fence[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Fence[i].draw) continue;
+		if (!fence[i].draw) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -210,24 +210,24 @@ void DrawFence(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Fence[i].scl.x, g_Fence[i].scl.y, g_Fence[i].scl.z);
+		mtxScl = XMMatrixScaling(fence[i].scl.x, fence[i].scl.y, fence[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Fence[i].rot.x, g_Fence[i].rot.y + XM_PI, g_Fence[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(fence[i].rot.x, fence[i].rot.y + XM_PI, fence[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Fence[i].pos.x, g_Fence[i].pos.y, g_Fence[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(fence[i].pos.x, fence[i].pos.y, fence[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Fence[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&fence[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		switch (g_Fence[i].modelNo)
+		switch (fence[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelFence);
@@ -244,6 +244,6 @@ void DrawFence(void)
 //=============================================================================
 FENCE* GetFence(void)
 {
-	return &g_Fence[0];
+	return &fence[0];
 }
 

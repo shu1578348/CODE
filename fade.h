@@ -30,7 +30,7 @@ void UninitFade(void);
 void UpdateFade(void);
 void DrawFade(void);
 
-void SetFade(FADE fade, int modeNext);
+void SetFade(FADE nFade, int nextMode);
 FADE GetFade(void);
 
 

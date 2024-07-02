@@ -31,7 +31,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static DUNGEON	g_Dungeon[DUNGEON_MAX];			 // ダンジョンの最大数
+static DUNGEON	dungeon[DUNGEON_MAX];			 // ダンジョンの最大数
 
 //=============================================================================
 // 初期化処理
@@ -41,23 +41,23 @@ HRESULT InitDungeon(void)
 
 	for (int i = 0; i < DUNGEON_MAX; i++)
 	{
-		LoadModel(MODEL_DUNGEON, &g_Dungeon[i].model);
-		g_Dungeon[i].load = TRUE;
+		LoadModel(MODEL_DUNGEON, &dungeon[i].model);
+		dungeon[i].load = TRUE;
 
-		g_Dungeon[i].rot = { 0.0f, 0.0f, 0.0f };
-		g_Dungeon[i].scl = { 1.0f, 1.0f, 1.0f };
+		dungeon[i].rot = { 0.0f, 0.0f, 0.0f };
+		dungeon[i].scl = { 1.0f, 1.0f, 1.0f };
 
-		g_Dungeon[i].size = { DUNGEON_SIZE_X, DUNGEON_SIZE_Y, DUNGEON_SIZE_Z };
+		dungeon[i].size = { DUNGEON_SIZE_X, DUNGEON_SIZE_Y, DUNGEON_SIZE_Z };
 
-		g_Dungeon[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
-		g_Dungeon[i].use  = TRUE;		// TRUE:使用 / FALSE:未使用
+		dungeon[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
+		dungeon[i].use  = TRUE;		// TRUE:使用 / FALSE:未使用
 
 	}
 
 	// ダンジョンの表示位置
 	{
-		g_Dungeon[0].pos = { -220.0f, DUNGEON_OFFSET_Y,  -200.0f };
-		g_Dungeon[0].rot = { 0.0f, XM_PI, 0.0f };
+		dungeon[0].pos = { -220.0f, DUNGEON_OFFSET_Y,  -200.0f };
+		dungeon[0].rot = { 0.0f, XM_PI, 0.0f };
 	}
 
 	return S_OK;
@@ -71,11 +71,11 @@ void UninitDungeon(void)
 	for (int i = 0; i < DUNGEON_MAX; i++)
 	{
 		// モデルの解放処理
-		if (g_Dungeon[i].load)
+		if (dungeon[i].load)
 		{
-			UnloadModel(&g_Dungeon[i].model);
+			UnloadModel(&dungeon[i].model);
 
-			g_Dungeon[i].load = FALSE;
+			dungeon[i].load = FALSE;
 		}
 	}
 }
@@ -90,17 +90,17 @@ void UpdateDungeon(void)
 		//-------------------------------------------------------------------------
 		// 視錐台カリング処理
 		//-------------------------------------------------------------------------
-		g_Dungeon[i].draw = FrustumCulling(g_Dungeon[i].pos, g_Dungeon[i].rot, g_Dungeon[i].size);
+		dungeon[i].draw = FrustumCulling(dungeon[i].pos, dungeon[i].rot, dungeon[i].size);
 
 		//-------------------------------------------------------------------------
 		// フィールドの変更
 		//-------------------------------------------------------------------------
 		PLAYER* player = GetPlayer();
 
-		XMFLOAT3 pos = g_Dungeon[i].pos;
+		XMFLOAT3 pos = dungeon[i].pos;
 
-		pos.x -= sinf(g_Dungeon[i].rot.y) * 30.0f;
-		pos.z -= cosf(g_Dungeon[i].rot.y) * 30.0f;
+		pos.x -= sinf(dungeon[i].rot.y) * 30.0f;
+		pos.z -= cosf(dungeon[i].rot.y) * 30.0f;
 
 		if (CollisionBC(pos, player[0].pos, 30.0f, player[0].size))
 		{
@@ -121,10 +121,10 @@ void DrawDungeon(void)
 	for (int i = 0; i < DUNGEON_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Dungeon[i].use)  continue;
+		if (!dungeon[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Dungeon[i].draw) continue;
+		if (!dungeon[i].draw) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -132,24 +132,24 @@ void DrawDungeon(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Dungeon[i].scl.x, g_Dungeon[i].scl.y, g_Dungeon[i].scl.z);
+		mtxScl = XMMatrixScaling(dungeon[i].scl.x, dungeon[i].scl.y, dungeon[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Dungeon[i].rot.x, g_Dungeon[i].rot.y + XM_PI, g_Dungeon[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(dungeon[i].rot.x, dungeon[i].rot.y + XM_PI, dungeon[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Dungeon[i].pos.x, g_Dungeon[i].pos.y, g_Dungeon[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(dungeon[i].pos.x, dungeon[i].pos.y, dungeon[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Dungeon[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&dungeon[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		DrawModel(&g_Dungeon[i].model);
+		DrawModel(&dungeon[i].model);
 
 	}
 
@@ -160,5 +160,5 @@ void DrawDungeon(void)
 //=============================================================================
 DUNGEON* GetDungeon(void)
 {
-	return &g_Dungeon[0];
+	return &dungeon[0];
 }

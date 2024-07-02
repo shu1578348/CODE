@@ -40,13 +40,13 @@ void UninitPad(void);
 //*****************************************************************************
 
 //------------------------------- keyboard
-LPDIRECTINPUT8			g_pDInput = NULL;					// IDirectInput8インターフェースへのポインタ
-LPDIRECTINPUTDEVICE8	g_pDIDevKeyboard = NULL;			// IDirectInputDevice8インターフェースへのポインタ(キーボード)
-BYTE					g_keyState[NUM_KEY_MAX];			// キーボードの状態を受け取るワーク
-BYTE					g_keyStateTrigger[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
-BYTE					g_keyStateRepeat[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
-BYTE					g_keyStateRelease[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
-int						g_keyStateRepeatCnt[NUM_KEY_MAX];	// キーボードのリピートカウンタ
+LPDIRECTINPUT8			pDInput = NULL;					// IDirectInput8インターフェースへのポインタ
+LPDIRECTINPUTDEVICE8	pDIDevKeyboard = NULL;			// IDirectInputDevice8インターフェースへのポインタ(キーボード)
+BYTE					keyState[NUM_KEY_MAX];			// キーボードの状態を受け取るワーク
+BYTE					keyStateTrigger[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
+BYTE					keyStateRepeat[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
+BYTE					keyStateRelease[NUM_KEY_MAX];		// キーボードの状態を受け取るワーク
+int						keyStateRepeatCnt[NUM_KEY_MAX];	// キーボードのリピートカウンタ
 
 //--------------------------------- mouse
 static LPDIRECTINPUTDEVICE8 pMouse = NULL; // mouse
@@ -71,11 +71,11 @@ HRESULT InitInput(HINSTANCE hInst, HWND hWnd)
 {
 	HRESULT hr;
 
-	if (!g_pDInput)
+	if (!pDInput)
 	{
 		// DirectInputオブジェクトの作成
 		hr = DirectInput8Create(hInst, DIRECTINPUT_VERSION,
-			IID_IDirectInput8, (void**)&g_pDInput, NULL);
+			IID_IDirectInput8, (void**)&pDInput, NULL);
 	}
 
 	// キーボードの初期化
@@ -104,10 +104,10 @@ void UninitInput(void)
 	// パッドの終了処理
 	UninitPad();
 
-	if (g_pDInput)
+	if (pDInput)
 	{
-		g_pDInput->Release();
-		g_pDInput = NULL;
+		pDInput->Release();
+		pDInput = NULL;
 	}
 }
 
@@ -135,15 +135,15 @@ HRESULT InitKeyboard(HINSTANCE hInst, HWND hWnd)
 	HRESULT hr;
 
 	// デバイスオブジェクトを作成
-	hr = g_pDInput->CreateDevice(GUID_SysKeyboard, &g_pDIDevKeyboard, NULL);
-	if (FAILED(hr) || g_pDIDevKeyboard == NULL)
+	hr = pDInput->CreateDevice(GUID_SysKeyboard, &pDIDevKeyboard, NULL);
+	if (FAILED(hr) || pDIDevKeyboard == NULL)
 	{
 		MessageBox(hWnd, "キーボードがねぇ！", "警告！", MB_ICONWARNING);
 		return hr;
 	}
 
 	// データフォーマットを設定
-	hr = g_pDIDevKeyboard->SetDataFormat(&c_dfDIKeyboard);
+	hr = pDIDevKeyboard->SetDataFormat(&c_dfDIKeyboard);
 	if (FAILED(hr))
 	{
 		MessageBox(hWnd, "キーボードのデータフォーマットを設定できませんでした。", "警告！", MB_ICONWARNING);
@@ -151,7 +151,7 @@ HRESULT InitKeyboard(HINSTANCE hInst, HWND hWnd)
 	}
 
 	// 協調モードを設定（フォアグラウンド＆非排他モード）
-	hr = g_pDIDevKeyboard->SetCooperativeLevel(hWnd, (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
+	hr = pDIDevKeyboard->SetCooperativeLevel(hWnd, (DISCL_FOREGROUND | DISCL_NONEXCLUSIVE));
 	if (FAILED(hr))
 	{
 		MessageBox(hWnd, "キーボードの協調モードを設定できませんでした。", "警告！", MB_ICONWARNING);
@@ -159,7 +159,7 @@ HRESULT InitKeyboard(HINSTANCE hInst, HWND hWnd)
 	}
 
 	// キーボードへのアクセス権を獲得(入力制御開始)
-	g_pDIDevKeyboard->Acquire();
+	pDIDevKeyboard->Acquire();
 
 	return S_OK;
 }
@@ -169,10 +169,10 @@ HRESULT InitKeyboard(HINSTANCE hInst, HWND hWnd)
 //=============================================================================
 void UninitKeyboard(void)
 {
-	if (g_pDIDevKeyboard)
+	if (pDIDevKeyboard)
 	{
-		g_pDIDevKeyboard->Release();
-		g_pDIDevKeyboard = NULL;
+		pDIDevKeyboard->Release();
+		pDIDevKeyboard = NULL;
 	}
 }
 
@@ -185,37 +185,37 @@ HRESULT UpdateKeyboard(void)
 	BYTE keyStateOld[256];
 
 	// 前回のデータを保存
-	memcpy(keyStateOld, g_keyState, NUM_KEY_MAX);
+	memcpy(keyStateOld, keyState, NUM_KEY_MAX);
 
 	// デバイスからデータを取得
-	hr = g_pDIDevKeyboard->GetDeviceState(sizeof(g_keyState), g_keyState);
+	hr = pDIDevKeyboard->GetDeviceState(sizeof(keyState), keyState);
 	if (SUCCEEDED(hr))
 	{
 		for (int cnt = 0; cnt < NUM_KEY_MAX; cnt++)
 		{
-			g_keyStateTrigger[cnt] = (keyStateOld[cnt] ^ g_keyState[cnt]) & g_keyState[cnt];
-			g_keyStateRelease[cnt] = (keyStateOld[cnt] ^ g_keyState[cnt]) & ~g_keyState[cnt];
-			g_keyStateRepeat[cnt] = g_keyStateTrigger[cnt];
+			keyStateTrigger[cnt] = (keyStateOld[cnt] ^ keyState[cnt]) & keyState[cnt];
+			keyStateRelease[cnt] = (keyStateOld[cnt] ^ keyState[cnt]) & ~keyState[cnt];
+			keyStateRepeat[cnt] = keyStateTrigger[cnt];
 
-			if (g_keyState[cnt])
+			if (keyState[cnt])
 			{
-				g_keyStateRepeatCnt[cnt]++;
-				if (g_keyStateRepeatCnt[cnt] >= 20)
+				keyStateRepeatCnt[cnt]++;
+				if (keyStateRepeatCnt[cnt] >= 20)
 				{
-					g_keyStateRepeat[cnt] = g_keyState[cnt];
+					keyStateRepeat[cnt] = keyState[cnt];
 				}
 			}
 			else
 			{
-				g_keyStateRepeatCnt[cnt] = 0;
-				g_keyStateRepeat[cnt] = 0;
+				keyStateRepeatCnt[cnt] = 0;
+				keyStateRepeat[cnt] = 0;
 			}
 		}
 	}
 	else
 	{
 		// キーボードへのアクセス権を取得
-		g_pDIDevKeyboard->Acquire();
+		pDIDevKeyboard->Acquire();
 	}
 
 	return S_OK;
@@ -226,7 +226,7 @@ HRESULT UpdateKeyboard(void)
 //=============================================================================
 BOOL GetKeyboardPress(int key)
 {
-	return (g_keyState[key] & 0x80) ? TRUE : FALSE;
+	return (keyState[key] & 0x80) ? TRUE : FALSE;
 }
 
 //=============================================================================
@@ -234,7 +234,7 @@ BOOL GetKeyboardPress(int key)
 //=============================================================================
 BOOL GetKeyboardTrigger(int key)
 {
-	return (g_keyStateTrigger[key] & 0x80) ? TRUE : FALSE;
+	return (keyStateTrigger[key] & 0x80) ? TRUE : FALSE;
 }
 
 //=============================================================================
@@ -242,7 +242,7 @@ BOOL GetKeyboardTrigger(int key)
 //=============================================================================
 BOOL GetKeyboardRepeat(int key)
 {
-	return (g_keyStateRepeat[key] & 0x80) ? TRUE : FALSE;
+	return (keyStateRepeat[key] & 0x80) ? TRUE : FALSE;
 }
 
 //=============================================================================
@@ -250,7 +250,7 @@ BOOL GetKeyboardRepeat(int key)
 //=============================================================================
 BOOL GetKeyboardRelease(int key)
 {
-	return (g_keyStateRelease[key] & 0x80) ? TRUE : FALSE;
+	return (keyStateRelease[key] & 0x80) ? TRUE : FALSE;
 }
 
 
@@ -262,7 +262,7 @@ HRESULT InitializeMouse(HINSTANCE hInst, HWND hWindow)
 {
 	HRESULT result;
 	// デバイス作成
-	result = g_pDInput->CreateDevice(GUID_SysMouse, &pMouse, NULL);
+	result = pDInput->CreateDevice(GUID_SysMouse, &pMouse, NULL);
 	if (FAILED(result) || pMouse == NULL)
 	{
 		MessageBox(hWindow, "No mouse", "Warning", MB_OK | MB_ICONWARNING);
@@ -387,7 +387,7 @@ BOOL CALLBACK SearchGamePadCallback(LPDIDEVICEINSTANCE lpddi, LPVOID)
 {
 	HRESULT result;
 
-	result = g_pDInput->CreateDevice(lpddi->guidInstance, &pGamePad[padCount++], NULL);
+	result = pDInput->CreateDevice(lpddi->guidInstance, &pGamePad[padCount++], NULL);
 	return DIENUM_CONTINUE;	// 次のデバイスを列挙
 
 }
@@ -399,7 +399,7 @@ HRESULT InitializePad(void)			// パッド初期化
 
 	padCount = 0;
 	// ジョイパッドを探す
-	g_pDInput->EnumDevices(DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACK)SearchGamePadCallback, NULL, DIEDFL_ATTACHEDONLY);
+	pDInput->EnumDevices(DI8DEVCLASS_GAMECTRL, (LPDIENUMDEVICESCALLBACK)SearchGamePadCallback, NULL, DIEDFL_ATTACHEDONLY);
 	// セットしたコールバック関数が、パッドを発見した数だけ呼ばれる。
 
 	for (i = 0; i < padCount; i++) {

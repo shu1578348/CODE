@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // HP処理 [hpbar.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -28,20 +28,20 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer* g_VertexBuffer = NULL;		// 頂点情報
-static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer* vertexBuffer = NULL;		// 頂点情報
+static ID3D11ShaderResourceView* texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char* g_TexturName[] = {
+static char* texturName[] = {
 	"data/TEXTURE/hp_bar.png",
 	"data/TEXTURE/bar_base.png"
 };
 
-static BOOL						g_Use;						// true:使っている  false:未使用
-static float					g_w, g_h;					// 幅と高さ
-static XMFLOAT3					g_Pos;						// ポリゴンの座標
-static int						g_TexNo;					// テクスチャ番号
+static BOOL						use;						// true:使っている  false:未使用
+static float					w, h;					// 幅と高さ
+static XMFLOAT3					pos;						// ポリゴンの座標
+static int						texNo;					// テクスチャ番号
 
-static int						g_Hpbar;			    	// ヒットポイント
+static int						hpbar;			    	// ヒットポイント
 
 //=============================================================================
 // 初期化処理
@@ -53,12 +53,12 @@ HRESULT InitHpbar(void)
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		g_Texture[i] = NULL;
+		texture[i] = NULL;
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
-			g_TexturName[i],
+			texturName[i],
 			NULL,
 			NULL,
-			&g_Texture[i],
+			&texture[i],
 			NULL);
 	}
 
@@ -70,17 +70,17 @@ HRESULT InitHpbar(void)
 	bd.ByteWidth = sizeof(VERTEX_3D) * 4;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
+	GetDevice()->CreateBuffer(&bd, NULL, &vertexBuffer);
 
 
 	// バーの初期化
-	g_Use = TRUE;
-	g_w = TEXTURE_WIDTH;
-	g_h = TEXTURE_HEIGHT;
-	g_Pos = { 200.0f, 20.0f, 0.0f };
-	g_TexNo = 0;
+	use = TRUE;
+	w = TEXTURE_WIDTH;
+	h = TEXTURE_HEIGHT;
+	pos = { 200.0f, 20.0f, 0.0f };
+	texNo = 0;
 
-	g_Hpbar = 0;
+	hpbar = 0;
 
 	return S_OK;
 }
@@ -90,18 +90,18 @@ HRESULT InitHpbar(void)
 //=============================================================================
 void UninitHpbar(void)
 {
-	if (g_VertexBuffer)
+	if (vertexBuffer)
 	{
-		g_VertexBuffer->Release();
-		g_VertexBuffer = NULL;
+		vertexBuffer->Release();
+		vertexBuffer = NULL;
 	}
 
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		if (g_Texture[i])
+		if (texture[i])
 		{
-			g_Texture[i]->Release();
-			g_Texture[i] = NULL;
+			texture[i]->Release();
+			texture[i] = NULL;
 		}
 	}
 
@@ -116,7 +116,7 @@ void UpdateHpbar(void)
 
 #ifdef _DEBUG	// デバッグ情報を表示する
 	//char *str = GetDebugStr();
-	//sprintf(&str[strlen(str)], " PX:%.2f PY:%.2f", g_Pos.x, g_Pos.y);
+	//sprintf(&str[strlen(str)], " PX:%.2f PY:%.2f", pos.x, pos.y);
 
 #endif
 
@@ -132,7 +132,7 @@ void DrawHpbar(void)
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// マトリクス設定
 	SetWorldViewProjection2D();
@@ -147,13 +147,13 @@ void DrawHpbar(void)
 	SetMaterial(material);
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &texture[1]);
 
 	// HPの位置やテクスチャー座標を反映
-	float px = g_Pos.x;		// HPの表示位置X
-	float py = g_Pos.y;		// HPの表示位置Y
-	float pw = g_w;			// HPの表示幅
-	float ph = g_h;			// HPの表示高さ
+	float px = pos.x;		// HPの表示位置X
+	float py = pos.y;		// HPの表示位置Y
+	float pw = w;			// HPの表示幅
+	float ph = h;			// HPの表示高さ
 
 	float tw = 1.0f;		// テクスチャの幅
 	float th = 1.0f;		// テクスチャの高さ
@@ -161,7 +161,7 @@ void DrawHpbar(void)
 	float ty = 0.0f;		// テクスチャの左上Y座標
 
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+	SetSpriteColor(vertexBuffer, px, py, pw, ph, tx, ty, tw, th,
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	// ポリゴン描画
@@ -170,7 +170,7 @@ void DrawHpbar(void)
 	// 頂点バッファ設定
 	stride = sizeof(VERTEX_3D);
 	offset = 0;
-	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// マトリクス設定
 	SetWorldViewProjection2D();
@@ -185,12 +185,12 @@ void DrawHpbar(void)
 	SetMaterial(material);
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &texture[0]);
 	px = 12.0f + player[0].hp * 1.87f;	// HPの表示位置X
 	pw = player[0].hp * 4.0f;			// HPの表示幅
 
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+	SetSpriteColor(vertexBuffer, px, py, pw, ph, tx, ty, tw, th,
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	// ポリゴン描画

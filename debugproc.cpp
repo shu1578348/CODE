@@ -19,7 +19,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-char		g_aStrDebug[1024] = { "\0" };	// デバッグ情報
+char		aStrDebug[1024] = { "\0" };	// デバッグ情報
 
 
 //=============================================================================
@@ -29,10 +29,10 @@ void DrawDebugProc(void)
 {
 	RECT rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
-	DebugTextOut(g_aStrDebug, 0, 0);
+	DebugTextOut(aStrDebug, 0, 0);
 
 	// 情報クリア
-	memset(g_aStrDebug, 0, sizeof g_aStrDebug);
+	memset(aStrDebug, 0, sizeof aStrDebug);
 }
 
 //=============================================================================
@@ -102,9 +102,9 @@ void PrintDebugProc(char* fmt, ...)
 	va_end(list);
 
 	// 連結
-	if ((strlen(g_aStrDebug) + strlen(aBuf)) < ((sizeof g_aStrDebug) - 1))
+	if ((strlen(aStrDebug) + strlen(aBuf)) < ((sizeof aStrDebug) - 1))
 	{
-		strcat_s(g_aStrDebug, aBuf);
+		strcat_s(aStrDebug, aBuf);
 	}
 #endif
 }

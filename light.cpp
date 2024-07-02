@@ -22,11 +22,11 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static LIGHT	g_Light[LIGHT_MAX];
+static LIGHT	light[LIGHT_MAX];
 
-static FOG		g_Fog;
+static FOG		fog;
 
-static BOOL		g_FogEnable = FALSE;
+static BOOL		fogEnable = FALSE;
 
 
 //=============================================================================
@@ -38,31 +38,31 @@ void InitLight(void)
 	//ライト初期化
 	for (int i = 0; i < LIGHT_MAX; i++)
 	{
-		g_Light[i].Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_Light[i].Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-		g_Light[i].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		g_Light[i].Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		g_Light[i].Attenuation = 100.0f;	// 減衰距離
-		g_Light[i].Type = LIGHT_TYPE_NONE;	// ライトのタイプ
-		g_Light[i].Enable = FALSE;			// ON / OFF
-		SetLight(i, &g_Light[i]);
+		light[i].Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		light[i].Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+		light[i].Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		light[i].Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		light[i].Attenuation = 100.0f;	// 減衰距離
+		light[i].Type = LIGHT_TYPE_NONE;	// ライトのタイプ
+		light[i].Enable = FALSE;			// ON / OFF
+		SetLight(i, &light[i]);
 	}
 
 	// 並行光源の設定（世界を照らす光）
-	g_Light[0].Direction = XMFLOAT3( 0.0f, -1.0f, 0.0f);	// 光の向き
-	g_Light[0].Diffuse = XMFLOAT4( 1.5f, 1.5f, 1.5f, 1.0f);	// 光の色
-	g_Light[0].Type = LIGHT_TYPE_DIRECTIONAL;				// 並行光源
-	g_Light[0].Enable = TRUE;								// このライトをON
-	SetLight(0, &g_Light[0]);								// これで設定している
+	light[0].Direction = XMFLOAT3( 0.0f, -1.0f, 0.0f);	// 光の向き
+	light[0].Diffuse = XMFLOAT4( 1.5f, 1.5f, 1.5f, 1.0f);	// 光の色
+	light[0].Type = LIGHT_TYPE_DIRECTIONAL;				// 並行光源
+	light[0].Enable = TRUE;								// このライトをON
+	SetLight(0, &light[0]);								// これで設定している
 
 
 
 	// フォグの初期化（霧の効果）
-	g_Fog.FogStart = 100.0f;								// 視点からこの距離離れるとフォグがかかり始める
-	g_Fog.FogEnd = 250.0f;									// ここまで離れるとフォグの色で見えなくなる
-	g_Fog.FogColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);		// フォグの色
-	SetFog(&g_Fog);
-	SetFogEnable(g_FogEnable);				// 他の場所もチェックする shadow
+	fog.FogStart = 100.0f;								// 視点からこの距離離れるとフォグがかかり始める
+	fog.FogEnd = 250.0f;									// ここまで離れるとフォグの色で見えなくなる
+	fog.FogColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);		// フォグの色
+	SetFog(&fog);
+	SetFogEnable(fogEnable);				// 他の場所もチェックする shadow
 
 }
 
@@ -89,7 +89,7 @@ void SetLightData(int index, LIGHT* light)
 
 LIGHT* GetLightData(int index)
 {
-	return(&g_Light[index]);
+	return(&light[index]);
 }
 
 
@@ -103,12 +103,12 @@ void SetFogData(FOG* fog)
 
 FOG * GetFog(void)
 {
-	return &g_Fog;
+	return &fog;
 }
 
 BOOL GetFogEnable(void)
 {
-	return(g_FogEnable);
+	return(fogEnable);
 }
 
 
