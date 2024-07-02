@@ -30,7 +30,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static BOX	g_Box[BOX_MAX];			 // 木箱の最大数
+static BOX	box[BOX_MAX];			 // 木箱の最大数
 
 //=============================================================================
 // 初期化処理
@@ -40,22 +40,22 @@ HRESULT InitBox(void)
 
 	for (int i = 0; i < BOX_MAX; i++)
 	{
-		LoadModel(MODEL_BOX, &g_Box[i].model);
-		g_Box[i].load = TRUE;
+		LoadModel(MODEL_BOX, &box[i].model);
+		box[i].load = TRUE;
 
-		g_Box[i].rot  = { 0.0f, 0.0f, 0.0f };
-		g_Box[i].scl  = { 0.3f, 0.3f, 0.3f };
-		g_Box[i].size = { BOX_SIZE_X, BOX_SIZE_Y, BOX_SIZE_Z };
+		box[i].rot  = { 0.0f, 0.0f, 0.0f };
+		box[i].scl  = { 0.3f, 0.3f, 0.3f };
+		box[i].size = { BOX_SIZE_X, BOX_SIZE_Y, BOX_SIZE_Z };
 
-		g_Box[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
-		g_Box[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
+		box[i].draw = FALSE;	// TRUE:表示 / FALSE:非表示
+		box[i].use  = TRUE;	// TRUE:使用 / FALSE:未使用
 
 	}
 
 	// 木箱の表示位置
 	{
-		g_Box[0].pos = { -400.0f, 15.0f,  0.0f };
-		g_Box[0].rot = { 0.0f, 240.0f, 0.0f };
+		box[0].pos = { -400.0f, 15.0f,  0.0f };
+		box[0].rot = { 0.0f, 240.0f, 0.0f };
 	}
 
 	return S_OK;
@@ -69,11 +69,11 @@ void UninitBox(void)
 	for (int i = 0; i < BOX_MAX; i++)
 	{
 		// モデルの解放処理
-		if (g_Box[i].load)
+		if (box[i].load)
 		{
-			UnloadModel(&g_Box[i].model);
+			UnloadModel(&box[i].model);
 
-			g_Box[i].load = FALSE;
+			box[i].load = FALSE;
 		}
 	}
 }
@@ -88,7 +88,7 @@ void UpdateBox(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < BOX_MAX; i++)
 	{
-		g_Box[i].draw = FrustumCulling(g_Box[i].pos,g_Box[i].rot, g_Box[i].size);
+		box[i].draw = FrustumCulling(box[i].pos,box[i].rot, box[i].size);
 	}
 
 }
@@ -102,10 +102,10 @@ void DrawBox(void)
 	for (int i = 0; i < BOX_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Box[i].use)  continue;
+		if (!box[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Box[i].draw) continue;
+		if (!box[i].draw) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -113,24 +113,24 @@ void DrawBox(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Box[i].scl.x, g_Box[i].scl.y, g_Box[i].scl.z);
+		mtxScl = XMMatrixScaling(box[i].scl.x, box[i].scl.y, box[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Box[i].rot.x, g_Box[i].rot.y + XM_PI, g_Box[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(box[i].rot.x, box[i].rot.y + XM_PI, box[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Box[i].pos.x, g_Box[i].pos.y, g_Box[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(box[i].pos.x, box[i].pos.y, box[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Box[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&box[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		DrawModel(&g_Box[i].model);
+		DrawModel(&box[i].model);
 
 	}
 
@@ -141,5 +141,5 @@ void DrawBox(void)
 //=============================================================================
 BOX* GetBox(void)
 {
-	return &g_Box[0];
+	return &box[0];
 }

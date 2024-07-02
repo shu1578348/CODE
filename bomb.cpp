@@ -38,8 +38,8 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static BOMB	g_Bomb[BOMB_MAX];	// 爆弾の最大数
-static BOOL	g_Load = FALSE;		// モデルの初期化フラグ
+static BOMB	bomb[BOMB_MAX];	// 爆弾の最大数
+static BOOL	load = FALSE;		// モデルの初期化フラグ
 DX11_MODEL modelBomb;		    // モデル情報
 
 //=============================================================================
@@ -52,25 +52,25 @@ HRESULT InitBomb(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < BOMB_MAX; i++)
 	{
-		g_Bomb[i].rot  = { 0.0f, 0.0f, 0.0f };
-		g_Bomb[i].scl  = { 0.8f, 0.8f, 0.8f };
-		g_Bomb[i].size = { BOMB_SIZE_X, BOMB_SIZE_Y, BOMB_SIZE_Z };
+		bomb[i].rot  = { 0.0f, 0.0f, 0.0f };
+		bomb[i].scl  = { 0.8f, 0.8f, 0.8f };
+		bomb[i].size = { BOMB_SIZE_X, BOMB_SIZE_Y, BOMB_SIZE_Z };
 
-		g_Bomb[i].modelNo = 0; // 表示モデルの種類
+		bomb[i].modelNo = 0; // 表示モデルの種類
 
-		g_Bomb[i].exTime = EXPLOSION_TIME; // 爆発時間
+		bomb[i].exTime = EXPLOSION_TIME; // 爆発時間
 
-		g_Bomb[i].exFlag = FALSE; // TRUE:爆発 / FALSE:未爆発
+		bomb[i].exFlag = FALSE; // TRUE:爆発 / FALSE:未爆発
 
-		g_Bomb[i].draw = TRUE;	  // TRUE:表示 / FALSE:非表示
-		g_Bomb[i].use  = TRUE;	  // TRUE:使用 / FALSE:未使用
+		bomb[i].draw = TRUE;	  // TRUE:表示 / FALSE:非表示
+		bomb[i].use  = TRUE;	  // TRUE:使用 / FALSE:未使用
 	}
 
 	//-------------------------------------------------------------------------
 	// モデルの読み込み
 	//-------------------------------------------------------------------------
 	{	
-		g_Load = TRUE;
+		load = TRUE;
 
 		// モデルの読み込み
 		LoadModel(MODEL_BOMB, &modelBomb);
@@ -80,8 +80,8 @@ HRESULT InitBomb(void)
 	// 位置の設定
 	//-------------------------------------------------------------------------
 	{
-		g_Bomb[0].pos = { -130.0f, 1.0f,  -90.0f };
-		g_Bomb[1].pos = { -500.0f, 1.0f,  635.0f };
+		bomb[0].pos = { -130.0f, 1.0f,  -90.0f };
+		bomb[1].pos = { -500.0f, 1.0f,  635.0f };
 	}
 
 	return S_OK;
@@ -92,11 +92,11 @@ HRESULT InitBomb(void)
 //=============================================================================
 void UninitBomb(void)
 {
-	if (g_Load)
+	if (load)
 	{
 		UnloadModel(&modelBomb);
 
-		g_Load = FALSE;
+		load = FALSE;
 	}
 }
 
@@ -114,13 +114,13 @@ void UpdateBomb(void)
 
 	for (int i = 0; i < BOMB_MAX; i++)
 	{
-		if (g_Bomb[i].use)
+		if (bomb[i].use)
 		{
 			//-------------------------------------------------------------------------
 			// 視錐台カリング
 			//-------------------------------------------------------------------------
 			{
-				g_Bomb[i].draw = FrustumCulling(g_Bomb[i].pos, g_Bomb[i].rot, g_Bomb[i].size);
+				bomb[i].draw = FrustumCulling(bomb[i].pos, bomb[i].rot, bomb[i].size);
 			}
 
 			//-------------------------------------------------------------------------
@@ -131,7 +131,7 @@ void UpdateBomb(void)
 				{
 					if (bullet[j].use)
 					{
-						if (CollisionBC(g_Bomb[i].pos, bullet[j].pos, BOMB_SIZE, BULLET_SIZE))
+						if (CollisionBC(bomb[i].pos, bullet[j].pos, BOMB_SIZE, BULLET_SIZE))
 						{
 							bullet[j].use = FALSE;
 
@@ -140,7 +140,7 @@ void UpdateBomb(void)
 							// ナイフ(炎)なら爆発する
 							if (bullet[j].type == 1)
 							{
-								g_Bomb[i].exFlag = TRUE;
+								bomb[i].exFlag = TRUE;
 							}
 						}
 					}
@@ -151,14 +151,14 @@ void UpdateBomb(void)
 			// 爆発時の処理
 			//-------------------------------------------------------------------------
 			{
-				if ((g_Bomb[i].exFlag) && (g_Bomb[i].use))
+				if ((bomb[i].exFlag) && (bomb[i].use))
 				{
 					//-----------------------------------------------------------------
 					// 爆発範囲の当たり判定
 					//-----------------------------------------------------------------
 					for (int k = 0; k < ENEMY_MAX; k++)
 					{
-						if (CollisionBC(g_Bomb[i].pos, enemy[k].pos, EXPLOSION_RANGE, ENEMY_SIZE))
+						if (CollisionBC(bomb[i].pos, enemy[k].pos, EXPLOSION_RANGE, ENEMY_SIZE))
 						{
 							// 敵が燃える
 							enemy[k].condition = 1;
@@ -179,7 +179,7 @@ void UpdateBomb(void)
 						float size;
 						int nLife;
 
-						pos = g_Bomb[i].pos;
+						pos = bomb[i].pos;
 
 						scale = { 1.0f, 1.0f, 1.0f };
 
@@ -202,18 +202,18 @@ void UpdateBomb(void)
 					//-----------------------------------------------------------------
 					// 爆発時間減少
 					//-----------------------------------------------------------------
-					g_Bomb[i].exTime--;
+					bomb[i].exTime--;
 
 				}
 
 				//-----------------------------------------------------------------
 				// 爆発の終了処理
 				//-----------------------------------------------------------------
-				if (g_Bomb[i].exTime < 0)
+				if (bomb[i].exTime < 0)
 				{
-					g_Bomb[i].exFlag = FALSE;
+					bomb[i].exFlag = FALSE;
 
-					g_Bomb[i].use = FALSE;
+					bomb[i].use = FALSE;
 				}
 
 			}
@@ -233,13 +233,13 @@ void DrawBomb(void)
 	for (int i = 0; i < BOMB_MAX; i++)
 	{
 		// 未使用
-		if (!g_Bomb[i].use)  continue;
+		if (!bomb[i].use)  continue;
 
 		// 非表示
-		if (!g_Bomb[i].draw) continue;
+		if (!bomb[i].draw) continue;
 
 		// 非表示
-		if (g_Bomb[i].exFlag) continue;
+		if (bomb[i].exFlag) continue;
 
 		XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
@@ -247,24 +247,24 @@ void DrawBomb(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Bomb[i].scl.x, g_Bomb[i].scl.y, g_Bomb[i].scl.z);
+		mtxScl = XMMatrixScaling(bomb[i].scl.x, bomb[i].scl.y, bomb[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Bomb[i].rot.x, g_Bomb[i].rot.y + XM_PI, g_Bomb[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(bomb[i].rot.x, bomb[i].rot.y + XM_PI, bomb[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Bomb[i].pos.x, g_Bomb[i].pos.y, g_Bomb[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(bomb[i].pos.x, bomb[i].pos.y, bomb[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Bomb[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&bomb[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		switch (g_Bomb[i].modelNo)
+		switch (bomb[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelBomb);
@@ -280,5 +280,5 @@ void DrawBomb(void)
 //=============================================================================
 BOMB* GetBomb(void)
 {
-	return &g_Bomb[0];
+	return &bomb[0];
 }

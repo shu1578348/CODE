@@ -49,8 +49,8 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static BOSS g_Boss[BOSS_MAX];	 // ボス構造体
-static BOOL	  g_Load = FALSE;	 // 初期化を行ったかのフラグ
+static BOSS boss[BOSS_MAX];	 // ボス構造体
+static BOOL	  load = FALSE;	 // 初期化を行ったかのフラグ
 DX11_MODEL	  modelBossBody;	 // モデル情報
 DX11_MODEL	  modelBossHead;	 // モデル情報
 
@@ -69,42 +69,42 @@ HRESULT InitBoss(void)
 	//-------------------------------------------------------------------------
 	for (int i = 0; i < BOSS_MAX; i++)
 	{
-		g_Boss[i].pos = XMFLOAT3(175.0f, BOSS_OFFSET_Y, -30.0f);
-		g_Boss[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_Boss[i].scl = XMFLOAT3(2.5f, 2.5f, 2.5f);
+		boss[i].pos = XMFLOAT3(175.0f, BOSS_OFFSET_Y, -30.0f);
+		boss[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		boss[i].scl = XMFLOAT3(2.5f, 2.5f, 2.5f);
 
-		g_Boss[i].tPos = XMFLOAT3(175.0f, BOSS_OFFSET_Y, -30.0f);
+		boss[i].tPos = XMFLOAT3(175.0f, BOSS_OFFSET_Y, -30.0f);
 
-		g_Boss[i].spd  = 0.0f;		// 移動スピードクリア
-		g_Boss[i].size = {BOSS_SIZE_X, BOSS_SIZE_Y, BOSS_SIZE_Z};	// 当たり判定の大きさ
+		boss[i].spd  = 0.0f;		// 移動スピードクリア
+		boss[i].size = {BOSS_SIZE_X, BOSS_SIZE_Y, BOSS_SIZE_Z};	// 当たり判定の大きさ
 
-		g_Boss[i].aRot = XMFLOAT3(0.0f, -0.5f, 0.0f); // 攻撃方向
+		boss[i].aRot = XMFLOAT3(0.0f, -0.5f, 0.0f); // 攻撃方向
 		
-		g_Boss[i].mode = 1;		    // 攻撃の種類
+		boss[i].mode = 1;		    // 攻撃の種類
 
-		g_Boss[i].draw  = TRUE;		// TRUE:表示   / FALSE:非表示
-		g_Boss[i].use   = TRUE;		// TRUE:使用   / FALSE:未使用
-		g_Boss[i].chase = FALSE;    // TRUE:追跡中 / FALSE:非追跡中
+		boss[i].draw  = TRUE;		// TRUE:表示   / FALSE:非表示
+		boss[i].use   = TRUE;		// TRUE:使用   / FALSE:未使用
+		boss[i].chase = FALSE;    // TRUE:追跡中 / FALSE:非追跡中
 
-		g_Boss[i].condition = 0;	// 通常状態にする
+		boss[i].condition = 0;	// 通常状態にする
 		
-		g_Boss[i].hp = BOSS_HP;     // ヒットポイントの初期化
+		boss[i].hp = BOSS_HP;     // ヒットポイントの初期化
 
-		g_Boss[i].state = FALSE;    // 状態
+		boss[i].state = FALSE;    // 状態
 		
 	}
 	//-------------------------------------------------------------------------
 	// 初期位置の設定
 	//-------------------------------------------------------------------------
 	{
-		g_Boss[0].pos = XMFLOAT3(-220.0f, BOSS_OFFSET_Y, -0.0f);
+		boss[0].pos = XMFLOAT3(-220.0f, BOSS_OFFSET_Y, -0.0f);
 	}
 
 	//-------------------------------------------------------------------------
 	// モデル読み込み
 	//-------------------------------------------------------------------------
 	{
-		g_Load = TRUE;
+		load = TRUE;
 
 		// モデルの読み込み
 		LoadModel(MODEL_BOSS_BODY, &modelBossBody);
@@ -119,11 +119,11 @@ HRESULT InitBoss(void)
 //=============================================================================
 void UninitBoss(void)
 {
-	if (g_Load)
+	if (load)
 	{
 		UnloadModel(&modelBossBody);
 		UnloadModel(&modelBossHead);
-		g_Load = FALSE;
+		load = FALSE;
 	}
 }
 
@@ -142,37 +142,37 @@ void UpdateBoss(void)
 	for (int i = 0; i < BOSS_MAX; i++)
 	{
 
-		if (g_Boss[i].use)	  // 使用判定
+		if (boss[i].use)	  // 使用判定
 		{
 			// 移動前の座標を保存
-			XMFLOAT3 oldPos = g_Boss[i].pos;
+			XMFLOAT3 oldPos = boss[i].pos;
 						
 			// 影もボスの位置に合わせる
-			XMFLOAT3 pos = g_Boss[i].pos;
+			XMFLOAT3 pos = boss[i].pos;
 			pos.y -= (BOSS_OFFSET_Y - 0.1f);
-			SetPositionShadow(g_Boss[i].shadowIdx, pos);
+			SetPositionShadow(boss[i].shadowIdx, pos);
 
 			//-------------------------------------------------------------------------------
 			// 視錐台カリング
 			//-------------------------------------------------------------------------------
 			{
-				g_Boss[i].draw = FrustumCulling(g_Boss[i].pos, g_Boss[i].rot, g_Boss[i].size);
+				boss[i].draw = FrustumCulling(boss[i].pos, boss[i].rot, boss[i].size);
 			}
 		
 			//-------------------------------------------------------------------------------
 			// 移動処理
 			//-------------------------------------------------------------------------------
 			{
-				g_Boss[i].spd = VALUE_MOVE;
+				boss[i].spd = VALUE_MOVE;
 
-				XMVECTOR epos = XMLoadFloat3(&g_Boss[i].pos);
+				XMVECTOR epos = XMLoadFloat3(&boss[i].pos);
 				XMVECTOR vec  = XMLoadFloat3(&player[0].pos) - epos;  // エネミーとプレイヤーの差分を求めている
 
 				// 目標の方向
-				g_Boss[i].rot.y = static_cast<float>(atan2(vec.m128_f32[0], vec.m128_f32[2]) - XM_PI);
+				boss[i].rot.y = static_cast<float>(atan2(vec.m128_f32[0], vec.m128_f32[2]) - XM_PI);
 
-				g_Boss[i].pos.x -= sinf(g_Boss[i].rot.y) * g_Boss[i].spd;
-				g_Boss[i].pos.z -= cosf(g_Boss[i].rot.y) * g_Boss[i].spd;
+				boss[i].pos.x -= sinf(boss[i].rot.y) * boss[i].spd;
+				boss[i].pos.z -= cosf(boss[i].rot.y) * boss[i].spd;
 			}
 
 			//-------------------------------------------------------------------------
@@ -187,9 +187,9 @@ void UpdateBoss(void)
 				// モード切替処理
 				if (clCTime >= MODE_CHANGE)
 				{
-					g_Boss[i].mode = (g_Boss[i].mode + 1) % 3;
+					boss[i].mode = (boss[i].mode + 1) % 3;
 
-					g_Boss[i].aRot.y = g_Boss[i].rot.y - 0.5f;
+					boss[i].aRot.y = boss[i].rot.y - 0.5f;
 
 					pRad = 0;
 
@@ -203,19 +203,19 @@ void UpdateBoss(void)
 				int nLife;
 				float fSize;
 
-				switch (g_Boss[i].mode)
+				switch (boss[i].mode)
 				{
 				case 0:
 
 					// バレット攻撃のクールタイム
 					clBTime++;
 
-					g_Boss[i].aRot.y = g_Boss[i].rot.y;
+					boss[i].aRot.y = boss[i].rot.y;
 
 					if (clBTime >= 10)
 					{
 						// バレットによる攻撃
-						SetEnemyBullet(g_Boss[i].pos, g_Boss[i].rot, 0);
+						SetEnemyBullet(boss[i].pos, boss[i].rot, 0);
 
 						clBTime = 0;
 					}
@@ -225,28 +225,28 @@ void UpdateBoss(void)
 				case 1:
 
 					// ブレスの発射方向
-					if (g_Boss[i].aRot.y <= 0.5)
+					if (boss[i].aRot.y <= 0.5)
 					{
-						g_Boss[i].aRot.y += 0.005f;
+						boss[i].aRot.y += 0.005f;
 					}
 
 					for (int j = 0; j <= 10; j++)
 					{
-						pos = g_Boss[i].pos;
+						pos = boss[i].pos;
 
 						pos.y +=  80.0f;
 
-						pos.x -= sinf(g_Boss[i].aRot.y) * j;
-						pos.z -= cosf(g_Boss[i].aRot.y) * j;
+						pos.x -= sinf(boss[i].aRot.y) * j;
+						pos.z -= cosf(boss[i].aRot.y) * j;
 
-						pos.x -= sinf(g_Boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
-						pos.z -= cosf(g_Boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
-						pos.y -= cosf(g_Boss[i].aRot.z + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
+						pos.x -= sinf(boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
+						pos.z -= cosf(boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
+						pos.y -= cosf(boss[i].aRot.z + pCnt + (XM_PI * 0.2f * j)) * 0.5f * j;
 
 						scale = { 0.25f, 0.25f, 0.25f };
 
-						move.x = -sinf(g_Boss[i].aRot.y) * 8.0f;
-						move.z = -cosf(g_Boss[i].aRot.y) * 8.0f;
+						move.x = -sinf(boss[i].aRot.y) * 8.0f;
+						move.z = -cosf(boss[i].aRot.y) * 8.0f;
 						move.y = -2.5f;
 
 						nLife = rand() % 100 + 150;
@@ -256,21 +256,21 @@ void UpdateBoss(void)
 						// ビルボードの設定
 						SetParticle(pos, pos, move, scale, XMFLOAT4(0.0f, 0.2f, 1.0f, 1.0f), fSize, fSize, nLife, 2);
 
-						pos = g_Boss[i].pos;
+						pos = boss[i].pos;
 
-						pos.y = g_Boss[i].pos.y + 80.0f;
+						pos.y = boss[i].pos.y + 80.0f;
 
-						pos.x -= sinf(g_Boss[i].aRot.y) * j;
-						pos.z -= cosf(g_Boss[i].aRot.y) * j;
+						pos.x -= sinf(boss[i].aRot.y) * j;
+						pos.z -= cosf(boss[i].aRot.y) * j;
 
-						pos.x -= sinf(g_Boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
-						pos.z -= cosf(g_Boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
-						pos.y -= cosf(g_Boss[i].aRot.z + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
+						pos.x -= sinf(boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
+						pos.z -= cosf(boss[i].aRot.y + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
+						pos.y -= cosf(boss[i].aRot.z + pCnt + (XM_PI * 0.2f * j)) * 0.6f * j;
 
 						scale = { 0.15f, 0.15f, 0.15f };
 
-						move.x = -sinf(g_Boss[i].aRot.y) * 8.0f;
-						move.z = -cosf(g_Boss[i].aRot.y) * 8.0f;
+						move.x = -sinf(boss[i].aRot.y) * 8.0f;
+						move.z = -cosf(boss[i].aRot.y) * 8.0f;
 						move.y = -2.5f;
 
 						nLife = rand() % 100 + 150;
@@ -290,10 +290,10 @@ void UpdateBoss(void)
 					for (int j = 0; j <= 20; j++)
 					{
 
-						pos = g_Boss[i].pos;
+						pos = boss[i].pos;
 
-						pos.x -= sinf(g_Boss[i].rot.y + pCnt + (XM_PI * 0.1f * j)) * (100.0f + pRad);
-						pos.z -= cosf(g_Boss[i].rot.y + pCnt + (XM_PI * 0.1f * j)) * (100.0f + pRad);
+						pos.x -= sinf(boss[i].rot.y + pCnt + (XM_PI * 0.1f * j)) * (100.0f + pRad);
+						pos.z -= cosf(boss[i].rot.y + pCnt + (XM_PI * 0.1f * j)) * (100.0f + pRad);
 
 						scale = { 0.3f, 0.3f, 0.3f };
 
@@ -316,10 +316,10 @@ void UpdateBoss(void)
 					for (int j = 0; j <= 20; j++)
 					{
 
-						pos = g_Boss[i].pos;
+						pos = boss[i].pos;
 
-						pos.x -= sinf(g_Boss[i].rot.y - pCnt + (XM_PI * 0.1f * j)) * (95.0f + pRad);
-						pos.z -= cosf(g_Boss[i].rot.y - pCnt + (XM_PI * 0.1f * j)) * (95.0f + pRad);
+						pos.x -= sinf(boss[i].rot.y - pCnt + (XM_PI * 0.1f * j)) * (95.0f + pRad);
+						pos.z -= cosf(boss[i].rot.y - pCnt + (XM_PI * 0.1f * j)) * (95.0f + pRad);
 
 						scale = { 0.3f, 0.3f, 0.3f };
 
@@ -359,17 +359,17 @@ void UpdateBoss(void)
 				int nLife;
 				float fSize;
 
-				switch (g_Boss[i].mode)
+				switch (boss[i].mode)
 				{
 				case 0:
 					break;
 
 				case 1: // ブレス
 
-					aPos = g_Boss[i].pos;
+					aPos = boss[i].pos;
 
-					aPos.x -= sinf(g_Boss[i].aRot.y - 0.1f) * 230.0f;
-					aPos.z -= cosf(g_Boss[i].aRot.y - 0.1f) * 230.0f;
+					aPos.x -= sinf(boss[i].aRot.y - 0.1f) * 230.0f;
+					aPos.z -= cosf(boss[i].aRot.y - 0.1f) * 230.0f;
 
 					for (int n = 0; n < PLAYER_MAX; n++)
 					{
@@ -412,9 +412,9 @@ void UpdateBoss(void)
 					{
 						if (player[n].use == TRUE)
 						{
-							if (CollisionBC(g_Boss[i].pos, player[0].pos, 100.0f + pRad, player[0].size))
+							if (CollisionBC(boss[i].pos, player[0].pos, 100.0f + pRad, player[0].size))
 							{
-								if (CollisionBC(g_Boss[i].pos, player[0].pos, 90.0f + pRad, player[0].size) == FALSE)
+								if (CollisionBC(boss[i].pos, player[0].pos, 90.0f + pRad, player[0].size) == FALSE)
 								{
 
 									player[0].hp -= CIRCLE_DAMAGE;
@@ -468,12 +468,12 @@ void UpdateBoss(void)
 				float fSize;
 				int nLife;
 
-				pos = g_Boss[i].pos;
+				pos = boss[i].pos;
 
 				pos.y = 90.0f;
 
-				pos.x -= sinf(g_Boss[i].aRot.y - 0.1f) * 50.0f;
-				pos.z -= cosf(g_Boss[i].aRot.y - 0.1f) * 50.0f;
+				pos.x -= sinf(boss[i].aRot.y - 0.1f) * 50.0f;
+				pos.z -= cosf(boss[i].aRot.y - 0.1f) * 50.0f;
 
 				scale = { 0.25f, 0.25f, 0.25f };
 				fAngle = (float)(rand() % 628 - 314) / 50;
@@ -490,12 +490,12 @@ void UpdateBoss(void)
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(0.1f, 1.0f, 0.1f, 1.0f), fSize, fSize, nLife, 1);
 
-				pos = g_Boss[i].pos;
+				pos = boss[i].pos;
 
 				pos.y = 90.0f;
 
-				pos.x -= sinf(g_Boss[i].aRot.y + 0.2f) * 50.0f;
-				pos.z -= cosf(g_Boss[i].aRot.y + 0.2f) * 50.0f;
+				pos.x -= sinf(boss[i].aRot.y + 0.2f) * 50.0f;
+				pos.z -= cosf(boss[i].aRot.y + 0.2f) * 50.0f;
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(0.1f, 1.0f, 0.1f, 1.0f), fSize, fSize, nLife, 1);
@@ -504,13 +504,13 @@ void UpdateBoss(void)
 
 			{ // mode0のときのブレスをためるエフェクト
 
-				XMFLOAT3 tPos = g_Boss[i].pos;
+				XMFLOAT3 tPos = boss[i].pos;
 				tPos.y += 75.0f;
 				float radius = 70.0f;
-				tPos.x -= sinf(g_Boss[i].aRot.y) * 40.0f;
-				tPos.z -= cosf(g_Boss[i].aRot.y) * 40.0f;
+				tPos.x -= sinf(boss[i].aRot.y) * 40.0f;
+				tPos.z -= cosf(boss[i].aRot.y) * 40.0f;
 
-				if (g_Boss[i].mode == 0)
+				if (boss[i].mode == 0)
 				{
 					// アフィン変換行列の作成
 					XMMATRIX transformMatrix = XMMatrixTranslation(tPos.x, tPos.y, tPos.z); // 平行移動行列
@@ -557,9 +557,9 @@ void UpdateBoss(void)
 			// 死亡判定処理
 			//-------------------------------------------------------------------------
 			{
-				if (g_Boss[i].hp <= 0)
+				if (boss[i].hp <= 0)
 				{
-					g_Boss[i].use = FALSE;
+					boss[i].use = FALSE;
 					SetFade(FADE_OUT, MODE_RESULT);
 					AddScore(1000);
 				}
@@ -588,33 +588,33 @@ void DrawBoss(void)
 	for (int i = 0; i < BOSS_MAX; i++)
 	{
 		// TRUE:使用 / FALSE:未使用
-		if (!g_Boss[i].use)  continue;
+		if (!boss[i].use)  continue;
 
 		// TRUE:表示 / FALSE:非表示
-		if (!g_Boss[i].draw) continue;
+		if (!boss[i].draw) continue;
 
 		// ワールドマトリックスの初期化
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Boss[i].scl.x, g_Boss[i].scl.y, g_Boss[i].scl.z);
+		mtxScl = XMMatrixScaling(boss[i].scl.x, boss[i].scl.y, boss[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Boss[i].rot.x, g_Boss[i].rot.y + XM_PI, g_Boss[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(boss[i].rot.x, boss[i].rot.y + XM_PI, boss[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Boss[i].pos.x, g_Boss[i].pos.y, g_Boss[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(boss[i].pos.x, boss[i].pos.y, boss[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Boss[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&boss[i].mtxWorld, mtxWorld);
 
 		// 体の描画
-		switch (g_Boss[i].modelNo)
+		switch (boss[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelBossBody);
@@ -625,24 +625,24 @@ void DrawBoss(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Boss[i].scl.x, g_Boss[i].scl.y, g_Boss[i].scl.z);
+		mtxScl = XMMatrixScaling(boss[i].scl.x, boss[i].scl.y, boss[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Boss[i].aRot.x, g_Boss[i].aRot.y + XM_PI, g_Boss[i].aRot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(boss[i].aRot.x, boss[i].aRot.y + XM_PI, boss[i].aRot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Boss[i].pos.x, g_Boss[i].pos.y, g_Boss[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(boss[i].pos.x, boss[i].pos.y, boss[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Boss[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&boss[i].mtxWorld, mtxWorld);
 
 		// 頭の描画
-		switch (g_Boss[i].modelNo)
+		switch (boss[i].modelNo)
 		{
 		case 0:
 			DrawModel(&modelBossHead);
@@ -660,5 +660,5 @@ void DrawBoss(void)
 //=============================================================================
 BOSS* GetBoss()
 {
-	return &g_Boss[0];
+	return &boss[0];
 }
