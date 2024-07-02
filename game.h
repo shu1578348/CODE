@@ -32,7 +32,7 @@ void UninitGame(void);
 void UpdateGame(void);
 void DrawGame(void);
 
-void SetField(int field);
+void SetField(int nextField);
 int GetField(void);
 
 BOOL FrustumCulling(XMFLOAT3 pos, XMFLOAT3 rot, XMFLOAT3 size);

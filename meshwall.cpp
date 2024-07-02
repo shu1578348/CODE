@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // メッシュ壁の処理 [meshwall.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -39,13 +39,13 @@ typedef struct
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
-static int							g_TexNo;		// テクスチャ番号
+static ID3D11ShaderResourceView* texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static int							texNo;		// テクスチャ番号
 
-static MESH_WALL g_aMeshWall[MAX_MESH_WALL];		// メッシュ壁ワーク
-static int g_nNumMeshField = 0;						// メッシュ壁の数
+static MESH_WALL aMeshWall[MAX_MESH_WALL];		// メッシュ壁ワーク
+static int nNumMeshField = 0;						// メッシュ壁の数
 
-static char* g_TextureName[] = {
+static char* textureName[] = {
 	"data/TEXTURE/wall000.jpg",
 };
 
@@ -57,31 +57,31 @@ HRESULT InitMeshWall(XMFLOAT3 pos, XMFLOAT3 rot, XMFLOAT4 col,
 {
 	MESH_WALL* pMesh;
 
-	if (g_nNumMeshField >= MAX_MESH_WALL)
+	if (nNumMeshField >= MAX_MESH_WALL)
 	{
 		return E_FAIL;
 	}
 
 	// テクスチャ生成
-	if (g_nNumMeshField == 0)
+	if (nNumMeshField == 0)
 	{	// TEXの読み込みは初めの１回だけにする
 		for (int i = 0; i < TEXTURE_MAX; i++)
 		{
-			g_Texture[i] = NULL;
+			texture[i] = NULL;
 			D3DX11CreateShaderResourceViewFromFile(GetDevice(),
-				g_TextureName[i],
+				textureName[i],
 				NULL,
 				NULL,
-				&g_Texture[i],
+				&texture[i],
 				NULL);
 		}
 	}
 
-	g_TexNo = 0;
+	texNo = 0;
 
-	pMesh = &g_aMeshWall[g_nNumMeshField];
+	pMesh = &aMeshWall[nNumMeshField];
 
-	g_nNumMeshField++;
+	nNumMeshField++;
 
 	// マテリアル情報の初期化
 	ZeroMemory(&pMesh->material, sizeof(pMesh->material));
@@ -130,8 +130,8 @@ HRESULT InitMeshWall(XMFLOAT3 pos, XMFLOAT3 rot, XMFLOAT4 col,
 
 	{//頂点バッファの中身を埋める
 #if 0
-		const float texSizeX = 1.0f / g_nNumBlockX;
-		const float texSizeZ = 1.0f / g_nNumBlockY;
+		const float texSizeX = 1.0f / nNumBlockX;
+		const float texSizeZ = 1.0f / nNumBlockY;
 #else
 		const float texSizeX = 1.0f;
 		const float texSizeZ = 1.0f;
@@ -212,9 +212,9 @@ void UninitMeshWall(void)
 	MESH_WALL* pMesh;
 	int nCntMeshField;
 
-	for (nCntMeshField = 0; nCntMeshField < g_nNumMeshField; nCntMeshField++)
+	for (nCntMeshField = 0; nCntMeshField < nNumMeshField; nCntMeshField++)
 	{
-		pMesh = &g_aMeshWall[nCntMeshField];
+		pMesh = &aMeshWall[nCntMeshField];
 
 		if (pMesh->vertexBuffer)
 		{// 頂点バッファの解放
@@ -232,15 +232,15 @@ void UninitMeshWall(void)
 	// テクスチャの解放
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		if (g_Texture[i])
+		if (texture[i])
 		{
-			g_Texture[i]->Release();
-			g_Texture[i] = NULL;
+			texture[i]->Release();
+			texture[i] = NULL;
 		}
 	}
 
 	//読み込み数をリセットする
-	g_nNumMeshField = 0;
+	nNumMeshField = 0;
 }
 
 //=============================================================================
@@ -258,9 +258,9 @@ void DrawMeshWall(void)
 	MESH_WALL* pMesh;
 	int nCntMeshField;
 
-	for (nCntMeshField = 0; nCntMeshField < g_nNumMeshField; nCntMeshField++)
+	for (nCntMeshField = 0; nCntMeshField < nNumMeshField; nCntMeshField++)
 	{
-		pMesh = &g_aMeshWall[nCntMeshField];
+		pMesh = &aMeshWall[nCntMeshField];
 
 		// 頂点バッファ設定
 		UINT stride = sizeof(VERTEX_3D);
@@ -277,7 +277,7 @@ void DrawMeshWall(void)
 		SetMaterial(pMesh->material);
 
 		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &texture[texNo]);
 
 
 

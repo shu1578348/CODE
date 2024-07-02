@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // 影処理 [shadow.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -40,13 +40,13 @@ HRESULT MakeVertexShadow(void);
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer* g_VertexBuffer = NULL;	// 頂点情報
-static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer* vertexBuffer = NULL;	// 頂点情報
+static ID3D11ShaderResourceView* texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static SHADOW					g_aShadow[MAX_SHADOW];		// 影ワーク
-static int						g_TexNo;					// テクスチャ番号
+static SHADOW					aShadow[MAX_SHADOW];		// 影ワーク
+static int						texNo;					// テクスチャ番号
 
-static char* g_TextureName[] = {
+static char* textureName[] = {
 	"data/TEXTURE/shadow000.jpg",
 };
 
@@ -62,23 +62,23 @@ HRESULT InitShadow(void)
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
-			g_TextureName[i],
+			textureName[i],
 			NULL,
 			NULL,
-			&g_Texture[i],
+			&texture[i],
 			NULL);
 	}
 
 	// 影ワーク初期化
 	for (int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
 	{
-		ZeroMemory(&g_aShadow[nCntShadow].material, sizeof(g_aShadow[nCntShadow].material));
-		g_aShadow[nCntShadow].material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		ZeroMemory(&aShadow[nCntShadow].material, sizeof(aShadow[nCntShadow].material));
+		aShadow[nCntShadow].material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		g_aShadow[nCntShadow].pos = XMFLOAT3(0.0f, 0.1f, 0.0f);
-		g_aShadow[nCntShadow].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_aShadow[nCntShadow].scl = XMFLOAT3(1.0f, 1.0f, 1.0f);
-		g_aShadow[nCntShadow].use = FALSE;
+		aShadow[nCntShadow].pos = XMFLOAT3(0.0f, 0.1f, 0.0f);
+		aShadow[nCntShadow].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		aShadow[nCntShadow].scl = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		aShadow[nCntShadow].use = FALSE;
 	}
 
 	return S_OK;
@@ -90,19 +90,19 @@ HRESULT InitShadow(void)
 void UninitShadow(void)
 {
 	// 頂点バッファの解放
-	if (g_VertexBuffer)
+	if (vertexBuffer)
 	{
-		g_VertexBuffer->Release();
-		g_VertexBuffer = NULL;
+		vertexBuffer->Release();
+		vertexBuffer = NULL;
 	}
 
 	// テクスチャの解放
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		if (g_Texture[i])
+		if (texture[i])
 		{
-			g_Texture[i]->Release();
-			g_Texture[i] = NULL;
+			texture[i]->Release();
+			texture[i] = NULL;
 		}
 	}
 
@@ -133,33 +133,33 @@ void DrawShadow(void)
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// プリミティブトポロジ設定
 	GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &texture[texNo]);
 
 	XMMATRIX mtxScl, mtxRot, mtxTranslate, mtxWorld;
 
 	for (int i = 0; i < MAX_SHADOW; i++)
 	{
-		if (g_aShadow[i].use)
+		if (aShadow[i].use)
 		{
 			// ワールドマトリックスの初期化
 			mtxWorld = XMMatrixIdentity();
 
 			// スケールを反映
-			mtxScl = XMMatrixScaling(g_aShadow[i].scl.x, g_aShadow[i].scl.y, g_aShadow[i].scl.z);
+			mtxScl = XMMatrixScaling(aShadow[i].scl.x, aShadow[i].scl.y, aShadow[i].scl.z);
 			mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 			// 回転を反映
-			mtxRot = XMMatrixRotationRollPitchYaw(g_aShadow[i].rot.x, g_aShadow[i].rot.y, g_aShadow[i].rot.z);
+			mtxRot = XMMatrixRotationRollPitchYaw(aShadow[i].rot.x, aShadow[i].rot.y, aShadow[i].rot.z);
 			mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 			// 移動を反映
-			mtxTranslate = XMMatrixTranslation(g_aShadow[i].pos.x, g_aShadow[i].pos.y, g_aShadow[i].pos.z);
+			mtxTranslate = XMMatrixTranslation(aShadow[i].pos.x, aShadow[i].pos.y, aShadow[i].pos.z);
 			mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 			// ワールドマトリックスの設定
@@ -167,7 +167,7 @@ void DrawShadow(void)
 
 
 			// マテリアルの設定
-			SetMaterial(g_aShadow[i].material);
+			SetMaterial(aShadow[i].material);
 
 			// ポリゴンの描画
 			GetDeviceContext()->Draw(4, 0);
@@ -197,11 +197,11 @@ HRESULT MakeVertexShadow()
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
+	GetDevice()->CreateBuffer(&bd, NULL, &vertexBuffer);
 
 	{//頂点バッファの中身を埋める
 		D3D11_MAPPED_SUBRESOURCE msr;
-		GetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+		GetDeviceContext()->Map(vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 
 		VERTEX_3D* vertex = (VERTEX_3D*)msr.pData;
 
@@ -229,7 +229,7 @@ HRESULT MakeVertexShadow()
 		vertex[2].TexCoord = XMFLOAT2(0.0f, 1.0f);
 		vertex[3].TexCoord = XMFLOAT2(1.0f, 1.0f);
 
-		GetDeviceContext()->Unmap(g_VertexBuffer, 0);
+		GetDeviceContext()->Unmap(vertexBuffer, 0);
 	}
 
 	return S_OK;
@@ -245,13 +245,13 @@ int CreateShadow(XMFLOAT3 pos, float fSizeX, float fSizeZ)
 	for (int nCntShadow = 0; nCntShadow < MAX_SHADOW; nCntShadow++)
 	{
 		// 未使用（FALSE）だったらそれを使う
-		if (!g_aShadow[nCntShadow].use)
+		if (!aShadow[nCntShadow].use)
 		{
-			g_aShadow[nCntShadow].pos = pos;
-			g_aShadow[nCntShadow].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-			g_aShadow[nCntShadow].scl = XMFLOAT3(fSizeX, 1.0f, fSizeZ);
-			g_aShadow[nCntShadow].material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-			g_aShadow[nCntShadow].use = TRUE;
+			aShadow[nCntShadow].pos = pos;
+			aShadow[nCntShadow].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			aShadow[nCntShadow].scl = XMFLOAT3(fSizeX, 1.0f, fSizeZ);
+			aShadow[nCntShadow].material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			aShadow[nCntShadow].use = TRUE;
 
 			nIdxShadow = nCntShadow;	// これがIndex番号
 			break;
@@ -268,7 +268,7 @@ void SetColorShadow(int nIdxShadow, XMFLOAT4 col)
 {
 	if (nIdxShadow >= 0 && nIdxShadow < MAX_SHADOW)
 	{
-		g_aShadow[nIdxShadow].material.Diffuse = col;
+		aShadow[nIdxShadow].material.Diffuse = col;
 	}
 }
 
@@ -279,7 +279,7 @@ void ReleaseShadow(int nIdxShadow)
 {
 	if (nIdxShadow >= 0 && nIdxShadow < MAX_SHADOW)
 	{
-		g_aShadow[nIdxShadow].use = FALSE;
+		aShadow[nIdxShadow].use = FALSE;
 	}
 }
 
@@ -290,7 +290,7 @@ void SetPositionShadow(int nIdxShadow, XMFLOAT3 pos)
 {
 	if (nIdxShadow >= 0 && nIdxShadow < MAX_SHADOW)
 	{
-		g_aShadow[nIdxShadow].pos = pos;
+		aShadow[nIdxShadow].pos = pos;
 	}
 }
 

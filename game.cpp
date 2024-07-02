@@ -30,7 +30,6 @@
 #include "ui.h"
 #include "boss.h"
 #include "enemybullet.h"
-#include "speartrap.h"
 #include "carriage.h"
 #include "box.h"
 #include <DirectXMath.h>
@@ -49,7 +48,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-int	g_Field;
+int	field;
 
 //=============================================================================
 // 初期化処理
@@ -57,10 +56,10 @@ int	g_Field;
 HRESULT InitGame(void)
 {
 	// フィールドの初期化
-	g_Field = VILLAGE;
+	field = VILLAGE;
 
 	// 最初のモードをセット
-	SetField(g_Field); // ここはSetFieldのまま
+	SetField(field); // ここはSetFieldのまま
 
 	return S_OK;
 
@@ -87,7 +86,7 @@ void UpdateGame(void)
 
 	ENEMY* enemy = GetEnemy();
 
-	switch (g_Field)
+	switch (field)
 	{
 	case VILLAGE:
 		// UIの更新処理
@@ -161,9 +160,6 @@ void UpdateGame(void)
 
 		// 爆弾の更新処理
 		UpdateBomb();
-
-		// 槍の更新処理
-		//UpdateTrap();
 
 		// パーティクルの更新
 		UpdateParticle();
@@ -253,7 +249,7 @@ void UpdateGame(void)
 void DrawGame(void)
 {
 
-	switch (g_Field)
+	switch (field)
 	{
 	case VILLAGE:
 
@@ -313,9 +309,6 @@ void DrawGame(void)
 		// 爆弾の描画処理
 		DrawBomb();
 
-		// 槍の描画処理
-		//DrawTrap();
-
 		// 弾の描画処理
 		DrawBullet();
 
@@ -369,7 +362,7 @@ void DrawGame(void)
 //=============================================================================
 // フィールドの設定
 //=============================================================================
-void SetField(int field)
+void SetField(int nextField)
 {
 	// UIの終了処理
 	UninitUi();
@@ -394,9 +387,6 @@ void SetField(int field)
 
 	// 爆弾の終了処理
 	UninitBomb();
-
-	// 槍の終了処理
-	//UninitTrap();
 
 	// 柵の終了処理
 	UninitFence();
@@ -435,9 +425,9 @@ void SetField(int field)
 	UninitMeshField();
 
 	// 次のフィールドをセットしている
-	g_Field = field;
+	field = nextField;
 
-	switch (g_Field)
+	switch (field)
 	{
 	case VILLAGE:
 		// カメラの初期化
@@ -658,9 +648,6 @@ void SetField(int field)
 		// 爆弾の初期化
 		InitBomb();
 
-		// 槍の初期化
-		//InitTrap();
-
 		// パーティクルの初期化
 		InitParticle();
 
@@ -737,7 +724,7 @@ void SetField(int field)
 //=============================================================================
 int GetField(void)
 {
-	return g_Field;
+	return field;
 }
 
 //=============================================================================

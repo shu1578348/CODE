@@ -166,7 +166,6 @@
     <ClInclude Include="sky.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="spbar.h" />
-    <ClInclude Include="speartrap.h" />
     <ClInclude Include="sprite.h" />
     <ClInclude Include="stall.h" />
     <ClInclude Include="title.h" />
@@ -208,7 +207,6 @@
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="spbar.cpp" />
-    <ClCompile Include="speartrap.cpp" />
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="stall.cpp" />
     <ClCompile Include="title.cpp" />

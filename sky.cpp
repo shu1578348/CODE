@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // モデル処理 [sky.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -27,7 +27,7 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static SKY			    g_Sky[SKY_MAX];			 // 空の最大数
+static SKY			    sky[SKY_MAX];			 // 空の最大数
 
 //=============================================================================
 // 初期化処理
@@ -36,14 +36,14 @@ HRESULT InitSky(void)
 {
 	for (int i = 0; i < SKY_MAX; i++)
 	{
-		LoadModel(MODEL_SKY, &g_Sky[i].model);
-		g_Sky[i].load = TRUE;
+		LoadModel(MODEL_SKY, &sky[i].model);
+		sky[i].load = TRUE;
 
-		g_Sky[i].pos = { 0.0f, -100.0f, 0.0f };
-		g_Sky[i].rot = { 0.0f,  0.0f, 0.0f };
-		g_Sky[i].scl = { 50.0f, 50.0f, 50.0f };
+		sky[i].pos = { 0.0f, -100.0f, 0.0f };
+		sky[i].rot = { 0.0f,  0.0f, 0.0f };
+		sky[i].scl = { 50.0f, 50.0f, 50.0f };
 
-		g_Sky[i].use = TRUE;
+		sky[i].use = TRUE;
 
 	}
 
@@ -58,10 +58,10 @@ void UninitSky(void)
 	for (int i = 0; i < SKY_MAX; i++)
 	{
 		// モデルの解放処理
-		if (g_Sky[i].load)
+		if (sky[i].load)
 		{
-			UnloadModel(&g_Sky[i].model);
-			g_Sky[i].load = FALSE;
+			UnloadModel(&sky[i].model);
+			sky[i].load = FALSE;
 		}
 	}
 }
@@ -72,7 +72,7 @@ void UninitSky(void)
 void UpdateSky(void)
 {
 	// 回転させて空を動かす
-	g_Sky[0].rot.x += 0.0001f;
+	sky[0].rot.x += 0.0001f;
 }
 
 //=============================================================================
@@ -92,24 +92,24 @@ void DrawSky(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Sky[i].scl.x, g_Sky[i].scl.y, g_Sky[i].scl.z);
+		mtxScl = XMMatrixScaling(sky[i].scl.x, sky[i].scl.y, sky[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Sky[i].rot.x, g_Sky[i].rot.y + XM_PI, g_Sky[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(sky[i].rot.x, sky[i].rot.y + XM_PI, sky[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Sky[i].pos.x, g_Sky[i].pos.y, g_Sky[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(sky[i].pos.x, sky[i].pos.y, sky[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
 
-		XMStoreFloat4x4(&g_Sky[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&sky[i].mtxWorld, mtxWorld);
 
 		// モデル描画
-		DrawModel(&g_Sky[i].model);
+		DrawModel(&sky[i].model);
 
 		// ライティングを有効に
 		SetLightEnable(TRUE);
@@ -123,6 +123,6 @@ void DrawSky(void)
 //=============================================================================
 SKY* GetSky(void)
 {
-	return &g_Sky[0];
+	return &sky[0];
 }
 

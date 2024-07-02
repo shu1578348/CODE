@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // リザルト画面処理 [result.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "result.h"
@@ -32,10 +32,10 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer				*g_VertexBuffer = NULL;		// 頂点情報
-static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer				*vertexBuffer = NULL;		// 頂点情報
+static ID3D11ShaderResourceView	*texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char *g_TexturName[TEXTURE_MAX] = {
+static char *texturName[TEXTURE_MAX] = {
 	"data/TEXTURE/bg001.jpg",
 	"data/TEXTURE/result_logo.png",
 	"data/TEXTURE/num.png",
@@ -46,14 +46,14 @@ static char *g_TexturName[TEXTURE_MAX] = {
 };
 
 
-static BOOL						g_Use;						// TRUE:使っている  FALSE:未使用
-static float					g_w, g_h;					// 幅と高さ
-static XMFLOAT3					g_Pos;						// ポリゴンの座標
-static int						g_TexNo;					// テクスチャ番号
+static BOOL						use;						// TRUE:使っている  FALSE:未使用
+static float					w, h;					// 幅と高さ
+static XMFLOAT3					pos;						// ポリゴンの座標
+static int						texNo;					// テクスチャ番号
 
-static BOOL						g_Load = FALSE;
+static BOOL						load = FALSE;
 
-static SWITCH2	g_swtch;
+static SWITCH2	swtch;
 static float	alpha;
 static BOOL		flag_alpha;
 
@@ -70,12 +70,12 @@ HRESULT InitResult(void)
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		g_Texture[i] = NULL;
+		texture[i] = NULL;
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
-			g_TexturName[i],
+			texturName[i],
 			NULL,
 			NULL,
-			&g_Texture[i],
+			&texture[i],
 			NULL);
 	}
 
@@ -87,27 +87,27 @@ HRESULT InitResult(void)
 	bd.ByteWidth = sizeof(VERTEX_3D) * 4;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
+	GetDevice()->CreateBuffer(&bd, NULL, &vertexBuffer);
 
 
 	// 変数の初期化
-	g_Use   = TRUE;
-	g_w     = TEXTURE_WIDTH;
-	g_h     = TEXTURE_HEIGHT;
-	g_Pos   = { g_w / 2, 50.0f, 0.0f };
-	g_TexNo = 0;
+	use   = TRUE;
+	w     = TEXTURE_WIDTH;
+	h     = TEXTURE_HEIGHT;
+	pos   = { w / 2, 50.0f, 0.0f };
+	texNo = 0;
 
 	// BGM再生
 
 	// 変数の初期化
-	g_swtch.w = TEXTURE_SWTCH_W;
-	g_swtch.h = TEXTURE_SWTCH_H;//  x				H				Z
-	g_swtch.pos = XMFLOAT3(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT * 3 / 5, 0.0f);
+	swtch.w = TEXTURE_SWTCH_W;
+	swtch.h = TEXTURE_SWTCH_H;//  x				H				Z
+	swtch.pos = XMFLOAT3(SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT * 3 / 5, 0.0f);
 	//↑画像調整
-	g_swtch.texNo = 3;
+	swtch.texNo = 3;
 
-	g_swtch.u = 0.0f;
-	g_swtch.v = 0.0f;
+	swtch.u = 0.0f;
+	swtch.v = 0.0f;
 
 	SwitchResultWait = 0;
 
@@ -120,7 +120,7 @@ HRESULT InitResult(void)
 	flag_alpha = TRUE;
 
 
-	g_Load = TRUE;
+	load = TRUE;
 	return S_OK;
 }
 
@@ -129,24 +129,24 @@ HRESULT InitResult(void)
 //=============================================================================
 void UninitResult(void)
 {
-	if (g_Load == FALSE) return;
+	if (load == FALSE) return;
 
-	if (g_VertexBuffer)
+	if (vertexBuffer)
 	{
-		g_VertexBuffer->Release();
-		g_VertexBuffer = NULL;
+		vertexBuffer->Release();
+		vertexBuffer = NULL;
 	}
 
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		if (g_Texture[i])
+		if (texture[i])
 		{
-			g_Texture[i]->Release();
-			g_Texture[i] = NULL;
+			texture[i]->Release();
+			texture[i] = NULL;
 		}
 	}
 
-	g_Load = FALSE;
+	load = FALSE;
 }
 
 //=============================================================================
@@ -202,7 +202,7 @@ void DrawResult(void)
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
-	GetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
+	GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
 	// マトリクス設定
 	SetWorldViewProjection2D();
@@ -223,10 +223,10 @@ void DrawResult(void)
 		// リザルトの背景を描画
 		{
 			// テクスチャ設定
-			GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[4]);
+			GetDeviceContext()->PSSetShaderResources(0, 1, &texture[4]);
 
 			// １枚のポリゴンの頂点とテクスチャ座標を設定
-			SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, g_w, g_h, 0.0f, 0.0f, 1.0f, 1.0f);
+			SetSpriteLeftTop(vertexBuffer, 0.0f, 0.0f, w, h, 0.0f, 0.0f, 1.0f, 1.0f);
 
 			// ポリゴン描画
 			GetDeviceContext()->Draw(4, 0);
@@ -237,7 +237,7 @@ void DrawResult(void)
 	// スコア表示
 	{
 		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[2]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &texture[2]);
 
 		// 桁数分処理する
 		for (int i = 0; i < SCORE_DIGIT; i++)
@@ -257,7 +257,7 @@ void DrawResult(void)
 			float ty = 0.0f;			// テクスチャの左上Y座標
 
 			// １枚のポリゴンの頂点とテクスチャ座標を設定
-			SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+			SetSpriteColor(vertexBuffer, px, py, pw, ph, tx, ty, tw, th,
 				XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 			// ポリゴン描画

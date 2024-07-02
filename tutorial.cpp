@@ -32,9 +32,9 @@
 // グローバル変数
 //*****************************************************************************
 static ID3D11Buffer* g_VertexBuffer = NULL;		// 頂点情報
-static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView* texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char* g_TexturName[TEXTURE_MAX] = {
+static char* texturName[TEXTURE_MAX] = {
 	"data/TEXTURE/bg001.jpg",
 	"data/TEXTURE/Tutorial_logo.png",
 	"data/TEXTURE/num.png",
@@ -44,10 +44,10 @@ static char* g_TexturName[TEXTURE_MAX] = {
 };
 
 
-static BOOL						g_Use;						// TRUE:使っている  FALSE:未使用
-static float					g_w, g_h;					// 幅と高さ
-static XMFLOAT3					g_Pos;						// ポリゴンの座標
-static int						g_TexNo;					// テクスチャ番号
+static BOOL						use;						// TRUE:使っている  FALSE:未使用
+static float					w, h;					// 幅と高さ
+static XMFLOAT3					pos;						// ポリゴンの座標
+static int						texNo;					// テクスチャ番号
 
 static BOOL						g_Load = FALSE;
 
@@ -68,12 +68,12 @@ HRESULT InitTutorial(void)
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		g_Texture[i] = NULL;
+		texture[i] = NULL;
 		D3DX11CreateShaderResourceViewFromFile(GetDevice(),
-			g_TexturName[i],
+			texturName[i],
 			NULL,
 			NULL,
-			&g_Texture[i],
+			&texture[i],
 			NULL);
 	}
 
@@ -89,11 +89,11 @@ HRESULT InitTutorial(void)
 
 
 	// 変数の初期化
-	g_Use = TRUE;
-	g_w = TEXTURE_WIDTH;
-	g_h = TEXTURE_HEIGHT;
-	g_Pos = { g_w / 2, 50.0f, 0.0f };
-	g_TexNo = 0;
+	use = TRUE;
+	w = TEXTURE_WIDTH;
+	h = TEXTURE_HEIGHT;
+	pos = { w / 2, 50.0f, 0.0f };
+	texNo = 0;
 
 
 	// 変数の初期化
@@ -136,10 +136,10 @@ void UninitTutorial(void)
 
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
-		if (g_Texture[i])
+		if (texture[i])
 		{
-			g_Texture[i]->Release();
-			g_Texture[i] = NULL;
+			texture[i]->Release();
+			texture[i] = NULL;
 		}
 	}
 
@@ -209,10 +209,10 @@ void DrawTutorial(void)
 		// リザルトの背景を描画
 		{
 			// テクスチャ設定
-			GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[4]);
+			GetDeviceContext()->PSSetShaderResources(0, 1, &texture[4]);
 
 			// １枚のポリゴンの頂点とテクスチャ座標を設定
-			SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, g_w, g_h, 0.0f, 0.0f, 1.0f, 1.0f);
+			SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, w, h, 0.0f, 0.0f, 1.0f, 1.0f);
 
 			// ポリゴン描画
 			GetDeviceContext()->Draw(4, 0);

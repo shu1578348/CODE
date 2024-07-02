@@ -126,9 +126,6 @@
     <ClInclude Include="dungeon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="speartrap.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="carriage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -246,9 +243,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="dungeon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="speartrap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="carriage.cpp">

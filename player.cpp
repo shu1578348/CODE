@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // モデル処理 [player.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -74,14 +74,14 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static PLAYER		g_Player;						// プレイヤー
+static PLAYER		player;						// プレイヤー
 
-static PLAYER		g_Parts[PLAYER_PARTS_MAX];		// プレイヤーのパーツ用
+static PLAYER		parts[PLAYER_PARTS_MAX];		// プレイヤーのパーツ用
 
 DX11_MODEL			mSword;	// 剣
 DX11_MODEL			mTorch;	// 松明		
 
-static BOOL g_Load; // ツール初期化用
+static BOOL load; // ツール初期化用
 
 int padTool = 0; // パッドのツール変更用
 
@@ -734,7 +734,7 @@ static INTERPOLATION_DATA move_tbl_run_tool[] = {	// pos, rot, scl, frame
 };
 
 
-static INTERPOLATION_DATA* g_MoveTblAdr[] =
+static INTERPOLATION_DATA* moveTblAdr[] =
 {
 	move_tbl_idle_head,
 	move_tbl_idle_hip,
@@ -899,34 +899,34 @@ int clTime = 0;	//	射撃間隔
 //=============================================================================
 HRESULT InitPlayer(void)
 {
-	LoadModel(MODEL_PLAYER_BODY, &g_Player.model);
-	g_Player.load = TRUE;
+	LoadModel(MODEL_PLAYER_BODY, &player.model);
+	player.load = TRUE;
 
 	// フィールドによっての初期位置を変える
 	switch (GetField())
 	{
 	case VILLAGE:
-		g_Player.pos = { -220, PLAYER_OFFSET_Y, 120.0f };
-		g_Player.rot = { 0.0f,  0.0, 0.0f };
-		g_Player.scl = { 0.22f, 0.22f, 0.22f };
+		player.pos = { -220, PLAYER_OFFSET_Y, 120.0f };
+		player.rot = { 0.0f,  0.0, 0.0f };
+		player.scl = { 0.22f, 0.22f, 0.22f };
 
-		g_Player.hp = PLAYER_HP;
+		player.hp = PLAYER_HP;
 
 		break;
 
 	case DUNGEON_FIRST_FLOOR:
-		g_Player.pos = { -140, PLAYER_OFFSET_Y, -600.0f };
-		g_Player.rot = { 0.0f,  0.0, 0.0f };
-		g_Player.scl = { 0.22f, 0.22f, 0.22f };
+		player.pos = { -140, PLAYER_OFFSET_Y, -600.0f };
+		player.rot = { 0.0f,  0.0, 0.0f };
+		player.scl = { 0.22f, 0.22f, 0.22f };
 
 		break;
 
 	case DUNGEON_SECOND_FLOOR:
-		g_Player.pos = { -140, PLAYER_OFFSET_Y, -600.0f };
-		g_Player.rot = { 0.0f,  0.0, 0.0f };
-		g_Player.scl = { 0.22f, 0.22f, 0.22f };
+		player.pos = { -140, PLAYER_OFFSET_Y, -600.0f };
+		player.rot = { 0.0f,  0.0, 0.0f };
+		player.scl = { 0.22f, 0.22f, 0.22f };
 
-		g_Player.hp = PLAYER_HP;
+		player.hp = PLAYER_HP;
 
 
 		break;
@@ -935,206 +935,206 @@ HRESULT InitPlayer(void)
 
 #ifdef _DEBUG
 
-	g_Player.hp = PLAYER_HP;
+	player.hp = PLAYER_HP;
 
 #endif
 
-	g_Player.sp = PLAYER_SP;
+	player.sp = PLAYER_SP;
 
-	g_Player.spd = 0.0f;			// 移動スピードクリア
-	g_Player.size = PLAYER_SIZE;	// 当たり判定の大きさ
+	player.spd = 0.0f;			// 移動スピードクリア
+	player.size = PLAYER_SIZE;	// 当たり判定の大きさ
 
-	g_Player.use = TRUE;
+	player.use = TRUE;
 
-	g_Player.anim = TRUE;	// アニメーションの切り替え
+	player.anim = TRUE;	// アニメーションの切り替え
 
 	// プレイヤー姿勢
-	g_Player.pose = 0;	// 0:直立 / 1:歩行 / 2:構え / 3:投擲 / 4:攻撃 / 5:走り
+	player.pose = 0;	// 0:直立 / 1:歩行 / 2:構え / 3:投擲 / 4:攻撃 / 5:走り
 
 	// プレイヤーが手に持っているもの
-	g_Player.tool = 0;	// 0:剣 / 1:松明 / 2:投げナイフ / 3:投げナイフ(炎) / 4:投げナイフ(毒) / 5:投げナイフ(×3) / 5:投げナイフ(炎×3) / 5:投げナイフ(毒×3)
+	player.tool = 0;	// 0:剣 / 1:松明 / 2:投げナイフ / 3:投げナイフ(炎) / 4:投げナイフ(毒) / 5:投げナイフ(×3) / 5:投げナイフ(炎×3) / 5:投げナイフ(毒×3)
 
 	// ここでプレイヤー用の影を作成している
-	XMFLOAT3 pos = g_Player.pos;
+	XMFLOAT3 pos = player.pos;
 	pos.y -= (PLAYER_OFFSET_Y - 0.1f);
-	g_Player.shadowIdx = CreateShadow(pos, PLAYER_SHADOW_SIZE, PLAYER_SHADOW_SIZE);
+	player.shadowIdx = CreateShadow(pos, PLAYER_SHADOW_SIZE, PLAYER_SHADOW_SIZE);
 	//          ↑
 	//        このメンバー変数が生成した影のIndex番号
 
 	// 階層アニメーション用の初期化処理
-	g_Player.parent = NULL;			// 本体（親）なのでNULLを入れる
+	player.parent = NULL;			// 本体（親）なのでNULLを入れる
 
 	// パーツの初期化
 	for (int i = 0; i < PLAYER_PARTS_MAX; i++)
 	{
-		g_Parts[i].use = FALSE;
+		parts[i].use = FALSE;
 
 		// 位置・回転・スケールの初期設定
-		g_Parts[i].pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_Parts[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		g_Parts[i].scl = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		parts[i].pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		parts[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		parts[i].scl = XMFLOAT3(1.0f, 1.0f, 1.0f);
 
 		// 親子関係
-		g_Parts[i].parent = &g_Player;		// ← ここに親のアドレスを入れる
-	//	g_Parts[腕].parent= &g_Player;		// 腕だったら親は本体（プレイヤー）
-	//	g_Parts[手].parent= &g_Parts[腕];	// 指が腕の子供だった場合の例
+		parts[i].parent = &player;		// ← ここに親のアドレスを入れる
+	//	parts[腕].parent= &player;		// 腕だったら親は本体（プレイヤー）
+	//	parts[手].parent= &parts[腕];	// 指が腕の子供だった場合の例
 
 		// 階層アニメーション用のメンバー変数の初期化
-		g_Parts[i].time = 0.0f;		// 線形補間用のタイマーをクリア
-		g_Parts[i].tblNo = 0;			// 再生する行動データテーブルNoをセット
-		g_Parts[i].tblMax = 0;			// 再生する行動データテーブルのレコード数をセット
+		parts[i].time = 0.0f;		// 線形補間用のタイマーをクリア
+		parts[i].tblNo = 0;			// 再生する行動データテーブルNoをセット
+		parts[i].tblMax = 0;			// 再生する行動データテーブルのレコード数をセット
 
 		// パーツの読み込みはまだしていない
-		g_Parts[i].load = 0;
+		parts[i].load = 0;
 	}
 
 	// 頭
-	g_Parts[0].use = TRUE;
-	g_Parts[0].parent = &g_Player;	// 親をセット
-	g_Parts[0].tblNo = 0;			// 再生するアニメデータの先頭アドレスをセット
-	g_Parts[0].tblMax = sizeof(move_tbl_idle_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[0].load = 1;
-	LoadModel(MODEL_PLAYER_HEAD, &g_Parts[0].model);
+	parts[0].use = TRUE;
+	parts[0].parent = &player;	// 親をセット
+	parts[0].tblNo = 0;			// 再生するアニメデータの先頭アドレスをセット
+	parts[0].tblMax = sizeof(move_tbl_idle_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[0].load = 1;
+	LoadModel(MODEL_PLAYER_HEAD, &parts[0].model);
 
 
 	// 腰
-	g_Parts[1].use = TRUE;
-	g_Parts[1].parent = &g_Player;	// 親をセット
-	g_Parts[1].tblNo = 1;			// 再生するアニメデータの先頭アドレスをセット
-	g_Parts[1].tblMax = sizeof(move_tbl_idle_hip) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[1].load = 1;
-	LoadModel(MODEL_PLAYER_HIP, &g_Parts[1].model);
+	parts[1].use = TRUE;
+	parts[1].parent = &player;	// 親をセット
+	parts[1].tblNo = 1;			// 再生するアニメデータの先頭アドレスをセット
+	parts[1].tblMax = sizeof(move_tbl_idle_hip) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[1].load = 1;
+	LoadModel(MODEL_PLAYER_HIP, &parts[1].model);
 
 
 	// 左腕
-	g_Parts[2].use = TRUE;
-	g_Parts[2].parent = &g_Player; // 親をセット
-	g_Parts[2].tblNo = 2;			 // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[2].tblMax = sizeof(move_tbl_idle_lshoulder) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[2].load = 1;
-	LoadModel(MODEL_PLAYER_SHOULDER_L, &g_Parts[2].model);
+	parts[2].use = TRUE;
+	parts[2].parent = &player; // 親をセット
+	parts[2].tblNo = 2;			 // 再生するアニメデータの先頭アドレスをセット
+	parts[2].tblMax = sizeof(move_tbl_idle_lshoulder) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[2].load = 1;
+	LoadModel(MODEL_PLAYER_SHOULDER_L, &parts[2].model);
 
-	g_Parts[3].use = TRUE;
-	g_Parts[3].parent = &g_Parts[2];  // 親をセット
-	g_Parts[3].tblNo = 3;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[3].tblMax = sizeof(move_tbl_idle_larm01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[3].load = 1;
-	LoadModel(MODEL_PLAYER_UPPER_ARM_L, &g_Parts[3].model);
+	parts[3].use = TRUE;
+	parts[3].parent = &parts[2];  // 親をセット
+	parts[3].tblNo = 3;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[3].tblMax = sizeof(move_tbl_idle_larm01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[3].load = 1;
+	LoadModel(MODEL_PLAYER_UPPER_ARM_L, &parts[3].model);
 
-	g_Parts[4].use = TRUE;
-	g_Parts[4].parent = &g_Parts[3];  // 親をセット
-	g_Parts[4].tblNo = 4;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[4].tblMax = sizeof(move_tbl_idle_lelbow) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[4].load = 1;
-	LoadModel(MODEL_PLAYER_ELBOW_L, &g_Parts[4].model);
+	parts[4].use = TRUE;
+	parts[4].parent = &parts[3];  // 親をセット
+	parts[4].tblNo = 4;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[4].tblMax = sizeof(move_tbl_idle_lelbow) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[4].load = 1;
+	LoadModel(MODEL_PLAYER_ELBOW_L, &parts[4].model);
 
-	g_Parts[5].use = TRUE;
-	g_Parts[5].parent = &g_Parts[4];  // 親をセット
-	g_Parts[5].tblNo = 5;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[5].tblMax = sizeof(move_tbl_idle_larm02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[5].load = 1;
-	LoadModel(MODEL_PLAYER_FORE_ARM_L, &g_Parts[5].model);
+	parts[5].use = TRUE;
+	parts[5].parent = &parts[4];  // 親をセット
+	parts[5].tblNo = 5;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[5].tblMax = sizeof(move_tbl_idle_larm02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[5].load = 1;
+	LoadModel(MODEL_PLAYER_FORE_ARM_L, &parts[5].model);
 
 
 	// 右腕
-	g_Parts[6].use = TRUE;
-	g_Parts[6].parent = &g_Player;	// 親をセット
-	g_Parts[6].tblNo = 6;			// 再生するアニメデータの先頭アドレスをセット
-	g_Parts[6].tblMax = sizeof(move_tbl_idle_rshoulder) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[6].load = 1;
-	LoadModel(MODEL_PLAYER_SHOULDER_R, &g_Parts[6].model);
+	parts[6].use = TRUE;
+	parts[6].parent = &player;	// 親をセット
+	parts[6].tblNo = 6;			// 再生するアニメデータの先頭アドレスをセット
+	parts[6].tblMax = sizeof(move_tbl_idle_rshoulder) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[6].load = 1;
+	LoadModel(MODEL_PLAYER_SHOULDER_R, &parts[6].model);
 
-	g_Parts[7].use = TRUE;
-	g_Parts[7].parent = &g_Parts[6];  // 親をセット
-	g_Parts[7].tblNo = 7;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[7].tblMax = sizeof(move_tbl_idle_rarm01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[7].load = 1;
-	LoadModel(MODEL_PLAYER_UPPER_ARM_R, &g_Parts[7].model);
+	parts[7].use = TRUE;
+	parts[7].parent = &parts[6];  // 親をセット
+	parts[7].tblNo = 7;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[7].tblMax = sizeof(move_tbl_idle_rarm01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[7].load = 1;
+	LoadModel(MODEL_PLAYER_UPPER_ARM_R, &parts[7].model);
 
-	g_Parts[8].use = TRUE;
-	g_Parts[8].parent = &g_Parts[7];  // 親をセット
-	g_Parts[8].tblNo = 8;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[8].tblMax = sizeof(move_tbl_idle_relbow) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[8].load = 1;
-	LoadModel(MODEL_PLAYER_ELBOW_R, &g_Parts[8].model);
+	parts[8].use = TRUE;
+	parts[8].parent = &parts[7];  // 親をセット
+	parts[8].tblNo = 8;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[8].tblMax = sizeof(move_tbl_idle_relbow) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[8].load = 1;
+	LoadModel(MODEL_PLAYER_ELBOW_R, &parts[8].model);
 
-	g_Parts[9].use = TRUE;
-	g_Parts[9].parent = &g_Parts[8];  // 親をセット
-	g_Parts[9].tblNo = 9;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[9].tblMax = sizeof(move_tbl_idle_rarm02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[9].load = 1;
-	LoadModel(MODEL_PLAYER_FORE_ARM_R, &g_Parts[9].model);
+	parts[9].use = TRUE;
+	parts[9].parent = &parts[8];  // 親をセット
+	parts[9].tblNo = 9;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[9].tblMax = sizeof(move_tbl_idle_rarm02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[9].load = 1;
+	LoadModel(MODEL_PLAYER_FORE_ARM_R, &parts[9].model);
 
 
 	// 左足
-	g_Parts[10].use = TRUE;
-	g_Parts[10].parent = &g_Parts[1];  // 親をセット
-	g_Parts[10].tblNo = 10;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[10].tblMax = sizeof(move_tbl_idle_lleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[10].load = 1;
-	LoadModel(MODEL_PLAYER_UPPER_LEG_L, &g_Parts[10].model);
+	parts[10].use = TRUE;
+	parts[10].parent = &parts[1];  // 親をセット
+	parts[10].tblNo = 10;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[10].tblMax = sizeof(move_tbl_idle_lleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[10].load = 1;
+	LoadModel(MODEL_PLAYER_UPPER_LEG_L, &parts[10].model);
 
-	g_Parts[11].use = TRUE;
-	g_Parts[11].parent = &g_Parts[10];  // 親をセット
-	g_Parts[11].tblNo = 11;			    // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[11].tblMax = sizeof(move_tbl_idle_lknee) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[11].load = 1;
-	LoadModel(MODEL_PLAYER_KNEE_L, &g_Parts[11].model);
+	parts[11].use = TRUE;
+	parts[11].parent = &parts[10];  // 親をセット
+	parts[11].tblNo = 11;			    // 再生するアニメデータの先頭アドレスをセット
+	parts[11].tblMax = sizeof(move_tbl_idle_lknee) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[11].load = 1;
+	LoadModel(MODEL_PLAYER_KNEE_L, &parts[11].model);
 
-	g_Parts[12].use = TRUE;
-	g_Parts[12].parent = &g_Parts[11];  // 親をセット
-	g_Parts[12].tblNo = 12;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[12].tblMax = sizeof(move_tbl_idle_lleg02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[12].load = 1;
-	LoadModel(MODEL_PLAYER_LOWER_LEG_L, &g_Parts[12].model);
+	parts[12].use = TRUE;
+	parts[12].parent = &parts[11];  // 親をセット
+	parts[12].tblNo = 12;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[12].tblMax = sizeof(move_tbl_idle_lleg02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[12].load = 1;
+	LoadModel(MODEL_PLAYER_LOWER_LEG_L, &parts[12].model);
 
-	g_Parts[13].use = TRUE;
-	g_Parts[13].parent = &g_Parts[12];  // 親をセット
-	g_Parts[13].tblNo = 13;			    // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[13].tblMax = sizeof(move_tbl_idle_lfoot) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[13].load = 1;
-	LoadModel(MODEL_PLAYER_FOOT_L, &g_Parts[13].model);
+	parts[13].use = TRUE;
+	parts[13].parent = &parts[12];  // 親をセット
+	parts[13].tblNo = 13;			    // 再生するアニメデータの先頭アドレスをセット
+	parts[13].tblMax = sizeof(move_tbl_idle_lfoot) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[13].load = 1;
+	LoadModel(MODEL_PLAYER_FOOT_L, &parts[13].model);
 
 
 	// 右足
-	g_Parts[14].use = TRUE;
-	g_Parts[14].parent = &g_Parts[1];  // 親をセット
-	g_Parts[14].tblNo = 14;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[14].tblMax = sizeof(move_tbl_idle_rleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[14].load = 1;
-	LoadModel(MODEL_PLAYER_UPPER_LEG_R, &g_Parts[14].model);
+	parts[14].use = TRUE;
+	parts[14].parent = &parts[1];  // 親をセット
+	parts[14].tblNo = 14;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[14].tblMax = sizeof(move_tbl_idle_rleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[14].load = 1;
+	LoadModel(MODEL_PLAYER_UPPER_LEG_R, &parts[14].model);
 
-	g_Parts[15].use = TRUE;
-	g_Parts[15].parent = &g_Parts[14];  // 親をセット
-	g_Parts[15].tblNo = 15;			  // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[15].tblMax = sizeof(move_tbl_idle_rknee) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[15].load = 1;
-	LoadModel(MODEL_PLAYER_KNEE_R, &g_Parts[15].model);
+	parts[15].use = TRUE;
+	parts[15].parent = &parts[14];  // 親をセット
+	parts[15].tblNo = 15;			  // 再生するアニメデータの先頭アドレスをセット
+	parts[15].tblMax = sizeof(move_tbl_idle_rknee) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[15].load = 1;
+	LoadModel(MODEL_PLAYER_KNEE_R, &parts[15].model);
 
-	g_Parts[16].use = TRUE;
-	g_Parts[16].parent = &g_Parts[15];  // 親をセット
-	g_Parts[16].tblNo = 16;				// 再生するアニメデータの先頭アドレスをセット
-	g_Parts[16].tblMax = sizeof(move_tbl_idle_rleg02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[16].load = 1;
-	LoadModel(MODEL_PLAYER_LOWER_LEG_R, &g_Parts[16].model);
+	parts[16].use = TRUE;
+	parts[16].parent = &parts[15];  // 親をセット
+	parts[16].tblNo = 16;				// 再生するアニメデータの先頭アドレスをセット
+	parts[16].tblMax = sizeof(move_tbl_idle_rleg02) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[16].load = 1;
+	LoadModel(MODEL_PLAYER_LOWER_LEG_R, &parts[16].model);
 
-	g_Parts[17].use = TRUE;
-	g_Parts[17].parent = &g_Parts[16];  // 親をセット
-	g_Parts[17].tblNo = 17;			    // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[17].tblMax = sizeof(move_tbl_idle_rfoot) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[17].load = 1;
-	LoadModel(MODEL_PLAYER_FOOT_R, &g_Parts[17].model);
+	parts[17].use = TRUE;
+	parts[17].parent = &parts[16];  // 親をセット
+	parts[17].tblNo = 17;			    // 再生するアニメデータの先頭アドレスをセット
+	parts[17].tblMax = sizeof(move_tbl_idle_rfoot) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[17].load = 1;
+	LoadModel(MODEL_PLAYER_FOOT_R, &parts[17].model);
 
 	// ツール
-	g_Parts[18].use = TRUE;
-	g_Parts[18].parent = &g_Parts[9];  // 親をセット
-	g_Parts[18].tblNo = 18;			    // 再生するアニメデータの先頭アドレスをセット
-	g_Parts[18].tblMax = sizeof(move_tbl_idle_tool) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
-	g_Parts[18].load = 1;
+	parts[18].use = TRUE;
+	parts[18].parent = &parts[9];  // 親をセット
+	parts[18].tblNo = 18;			    // 再生するアニメデータの先頭アドレスをセット
+	parts[18].tblMax = sizeof(move_tbl_idle_tool) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+	parts[18].load = 1;
 
 	// ツールの読み込み
 	{
-		g_Load = TRUE;
+		load = TRUE;
 
 		LoadModel(MODEL_PLAYER_SWORD, &mSword);
 		LoadModel(MODEL_PLAYER_TORCH, &mTorch);
@@ -1149,24 +1149,24 @@ HRESULT InitPlayer(void)
 void UninitPlayer(void)
 {
 	// モデルの解放処理
-	if (g_Player.load)
+	if (player.load)
 	{
-		UnloadModel(&g_Player.model);
-		g_Player.load = FALSE;
+		UnloadModel(&player.model);
+		player.load = FALSE;
 
 		// パーツの解放処理
 		for (int i = 0; i < PLAYER_PARTS_MAX; i++)
 		{
-			UnloadModel(&g_Parts[i].model);
-			g_Parts[i].load = FALSE;
+			UnloadModel(&parts[i].model);
+			parts[i].load = FALSE;
 		}
 
 	}
 
 	//　ツールの解放処理
-	if (g_Load)
+	if (load)
 	{
-		g_Load = FALSE;
+		load = FALSE;
 
 		UnloadModel(&mSword);
 
@@ -1188,13 +1188,13 @@ void UpdatePlayer(void)
 	BULLET* bullet = GetBullet();   // バレット
 
 	// 移動前のポジションを保存
-	XMFLOAT3 oldPos = g_Player.pos;
+	XMFLOAT3 oldPos = player.pos;
 
 	// 入力前の姿勢を保持
-	int oldPose = g_Player.pose;
+	int oldPose = player.pose;
 
 	// ポーズを基本状態にする
-	g_Player.pose = 0;
+	player.pose = 0;
 
 	// 旋回速度
 	const float speed = VALUE_ROTATE; // 適切な速度を選択
@@ -1207,7 +1207,7 @@ void UpdatePlayer(void)
 		if (GetKeyboardPress(DIK_A) && GetKeyboardPress(DIK_W))
 		{
 			// 左上へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI * 3 / 4;
@@ -1216,7 +1216,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_D) && GetKeyboardPress(DIK_W))
 		{
 			// 右上へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = -XM_PI * 3 / 4;
@@ -1224,7 +1224,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_A) && GetKeyboardPress(DIK_S))
 		{
 			// 左下へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI / 4;
@@ -1232,7 +1232,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_D) && GetKeyboardPress(DIK_S))
 		{
 			// 右下へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = -XM_PI / 4;
@@ -1240,7 +1240,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_A))
 		{
 			// 左へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI / 2;
@@ -1248,7 +1248,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_D))
 		{
 			// 右へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = -XM_PI / 2;
@@ -1257,7 +1257,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_W))
 		{
 			// 上へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI;
@@ -1265,7 +1265,7 @@ void UpdatePlayer(void)
 		else if (GetKeyboardPress(DIK_S))
 		{
 			// 下へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = 0.0f;
@@ -1275,7 +1275,7 @@ void UpdatePlayer(void)
 		if (IsButtonPressed(1, BUTTON_UP))
 		{
 			// 上へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI;
@@ -1284,7 +1284,7 @@ void UpdatePlayer(void)
 		else if (IsButtonPressed(1, BUTTON_DOWN))
 		{
 			// 下へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = 0.0f;
@@ -1293,7 +1293,7 @@ void UpdatePlayer(void)
 		else if (IsButtonPressed(1, BUTTON_LEFT))
 		{
 			// 左へ移動
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = XM_PI / 2;
@@ -1301,18 +1301,18 @@ void UpdatePlayer(void)
 		}
 		else if (IsButtonPressed(1, BUTTON_RIGHT))
 		{
-			g_Player.spd = VALUE_MOVE;
+			player.spd = VALUE_MOVE;
 
 			// 目標の方向
 			targetDir = -XM_PI / 2;
 
 		}
 
-		if (g_Player.spd >= 0.0f)
+		if (player.spd >= 0.0f)
 		{
 
 			// 現在の方向から目標の方向への角度差を求める
-			angleDifference = targetDir - g_Player.dir;
+			angleDifference = targetDir - player.dir;
 
 			// 角度差を正確な範囲に調整
 			while (angleDifference > XM_PI)
@@ -1325,46 +1325,46 @@ void UpdatePlayer(void)
 				angleDifference += 2 * XM_PI;
 			}
 
-			// 補間を使用してg_Player.dirを目標の方向に近づける
-			g_Player.dir = Lerp(g_Player.dir, g_Player.dir + angleDifference, speed);
+			// 補間を使用してplayer.dirを目標の方向に近づける
+			player.dir = Lerp(player.dir, player.dir + angleDifference, speed);
 
 		}
 
 		// ダッシュ用
 		if (GetKeyboardPress(DIK_LSHIFT) || IsButtonPressed(1, BUTTON_Z))
 		{
-			if (g_Player.spd == VALUE_MOVE)
+			if (player.spd == VALUE_MOVE)
 			{
-				g_Player.spd = VALUE_DASH_MOVE;
+				player.spd = VALUE_DASH_MOVE;
 
 				// ダッシュアニメーション
-				g_Player.pose = 5;
+				player.pose = 5;
 			}
 		}
 
 		// Key入力があったら移動処理する
-		if (g_Player.spd > 0.0f)
+		if (player.spd > 0.0f)
 		{
-			g_Player.rot.y = g_Player.dir + cam->rot.y;
+			player.rot.y = player.dir + cam->rot.y;
 
 			// 入力のあった方向へプレイヤーを向かせて移動させる
-			g_Player.pos.x -= sinf(g_Player.rot.y) * g_Player.spd;
-			g_Player.pos.z -= cosf(g_Player.rot.y) * g_Player.spd;
+			player.pos.x -= sinf(player.rot.y) * player.spd;
+			player.pos.z -= cosf(player.rot.y) * player.spd;
 		}
 
 		// 影もプレイヤーの位置に合わせる
-		XMFLOAT3 pos = g_Player.pos;
+		XMFLOAT3 pos = player.pos;
 		pos.y -= (PLAYER_OFFSET_Y - 0.1f);
-		SetPositionShadow(g_Player.shadowIdx, pos);
+		SetPositionShadow(player.shadowIdx, pos);
 
 	}
 
 #ifdef _DEBUG
 	if (GetKeyboardPress(DIK_R))
 	{
-		g_Player.pos.z = g_Player.pos.x = 0.0f;
-		g_Player.rot.y = g_Player.dir = 0.0f;
-		g_Player.spd = 0.0f;
+		player.pos.z = player.pos.x = 0.0f;
+		player.rot.y = player.dir = 0.0f;
+		player.spd = 0.0f;
 
 
 	}
@@ -1387,14 +1387,14 @@ void UpdatePlayer(void)
 			// アニメーション再生時間の初期化
 			for (int t = 0; t < PLAYER_PARTS_MAX; t++)
 			{
-				g_Parts[t].time = 0;
+				parts[t].time = 0;
 			}
 		}
 
 		// 歩行アニメーション切り替え
-		if (g_Player.spd == VALUE_MOVE)
+		if (player.spd == VALUE_MOVE)
 		{
-			g_Player.pose = 1;
+			player.pose = 1;
 		}
 	}
 
@@ -1403,54 +1403,54 @@ void UpdatePlayer(void)
 	//-------------------------------------------------------------------------
 	{
 		// アニメーションを再生中は、ツールを切り替えられないようにする
-		if ((g_Player.anim) && (oldPose != 2))
+		if ((player.anim) && (oldPose != 2))
 		{
 			// ツール切り替え
 			if (GetKeyboardTrigger(DIK_1))
 			{// 剣
-				g_Player.tool = 0;
+				player.tool = 0;
 			}
 
 			if (GetKeyboardTrigger(DIK_2))
 			{// 松明
-				g_Player.tool = 1;
+				player.tool = 1;
 			}
 
 			if (GetKeyboardTrigger(DIK_3))
 			{// 投げナイフ用
-				g_Player.tool = 2;
+				player.tool = 2;
 			}
 
 			if (GetKeyboardTrigger(DIK_4))
 			{// 投げナイフ(炎)用
-				g_Player.tool = 3;
+				player.tool = 3;
 			}
 
 			if (GetKeyboardTrigger(DIK_5))
 			{// 投げナイフ(毒)用
-				g_Player.tool = 4;
+				player.tool = 4;
 			}
 
 			if (GetKeyboardTrigger(DIK_6))
 			{// 投げナイフ(×3)用
-				g_Player.tool = 5;
+				player.tool = 5;
 			}
 
 			if (GetKeyboardTrigger(DIK_7))
 			{// 投げナイフ(炎×3)用
-				g_Player.tool = 6;
+				player.tool = 6;
 			}
 
 			if (GetKeyboardTrigger(DIK_8))
 			{// 投げナイフ(毒×3)用
-				g_Player.tool = 7;
+				player.tool = 7;
 			}
 
 			if (IsButtonTriggered(1, BUTTON_A))
 			{
 				padTool++;
 
-				g_Player.tool = padTool % 8;
+				player.tool = padTool % 8;
 
 			}
 
@@ -1460,29 +1460,29 @@ void UpdatePlayer(void)
 	//-------------------------------------------------------------------------
 	// 攻撃
 	//-------------------------------------------------------------------------
-	if (g_Player.anim)
+	if (player.anim)
 	{
 
 
 		//-------------------------------------------------------------------------
 		// 剣による攻撃
 		//-------------------------------------------------------------------------
-		if (g_Player.tool == 0)
+		if (player.tool == 0)
 		{
 			if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(1, BUTTON_B))
 			{
 				// アニメーションを再生する
-				g_Player.anim = FALSE;
+				player.anim = FALSE;
 
 				// 姿勢の再設定
 				oldPose = 4;
 
-				g_Player.pose = 4;
+				player.pose = 4;
 
 				// アニメーション再生時間の初期化
 				for (int s = 0; s < PLAYER_PARTS_MAX; s++)
 				{
-					g_Parts[s].time = 0;
+					parts[s].time = 0;
 				}
 
 			}
@@ -1494,7 +1494,7 @@ void UpdatePlayer(void)
 	// 投げナイフによる攻撃
 	//-------------------------------------------------------------------------
 	{
-		if ((g_Player.tool == 2) || (g_Player.tool == 3) || (g_Player.tool == 4) || (g_Player.tool == 5) || (g_Player.tool == 6) || (g_Player.tool == 7))
+		if ((player.tool == 2) || (player.tool == 3) || (player.tool == 4) || (player.tool == 5) || (player.tool == 6) || (player.tool == 7))
 		{
 			if (BULLET_TIME < clTime)
 			{
@@ -1503,36 +1503,36 @@ void UpdatePlayer(void)
 					if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(1, BUTTON_B))
 					{
 						// spが足りなければアニメーションを変更しない
-						switch (g_Player.tool)
+						switch (player.tool)
 						{
 						case 2:
-							if (g_Player.sp >= 5.0f)
+							if (player.sp >= 5.0f)
 							{
 								clTime = 0;				// クールタイム
-								g_Player.pose = 2;		// アニメーションの切り替え
+								player.pose = 2;		// アニメーションの切り替え
 							}
 							break;
 						case 3:
 						case 4:
-							if (g_Player.sp >= 10.0f)
+							if (player.sp >= 10.0f)
 							{
 								clTime = 0;				// クールタイム
-								g_Player.pose = 2;		// アニメーションの切り替え
+								player.pose = 2;		// アニメーションの切り替え
 							}
 							break;
 						case 5:
-							if (g_Player.sp >= 15.0f)
+							if (player.sp >= 15.0f)
 							{
 								clTime = 0;				// クールタイム
-								g_Player.pose = 2;		// アニメーションの切り替え
+								player.pose = 2;		// アニメーションの切り替え
 							}
 							break;
 						case 6:
 						case 7:
-							if (g_Player.sp >= 30.0f)
+							if (player.sp >= 30.0f)
 							{
 								clTime = 0;				// クールタイム
-								g_Player.pose = 2;		// アニメーションの切り替え
+								player.pose = 2;		// アニメーションの切り替え
 							}
 							break;
 						}
@@ -1540,32 +1540,32 @@ void UpdatePlayer(void)
 						// アニメーション再生時間の初期化
 						for (int m = 0; m < PLAYER_PARTS_MAX; m++)
 						{
-							g_Parts[m].time = 0;
+							parts[m].time = 0;
 						}
 
-						XMFLOAT3 pos = g_Player.pos;
+						XMFLOAT3 pos = player.pos;
 
 						pos.y += 5.8f;
 
 						//　プレイヤーの向いている方向を向かせて位置を設定する
-						pos.x -= sinf(g_Player.rot.y - 0.55f) * 9.0f;
-						pos.z -= cosf(g_Player.rot.y - 0.55f) * 9.0f;
+						pos.x -= sinf(player.rot.y - 0.55f) * 9.0f;
+						pos.z -= cosf(player.rot.y - 0.55f) * 9.0f;
 
-						XMFLOAT3 rot = g_Player.rot;
+						XMFLOAT3 rot = player.rot;
 						rot.z += XM_PI / 2;
 						BOOL shot = FALSE;
 						int type = 0;
 
 						// バレットタイプ設定
-						switch (g_Player.tool)
+						switch (player.tool)
 						{
 
 						case 2:
 
-							if (g_Player.sp >= 5.0f)
+							if (player.sp >= 5.0f)
 							{
 
-								g_Player.sp -= 5.0f;
+								player.sp -= 5.0f;
 
 								type = 0;
 
@@ -1576,10 +1576,10 @@ void UpdatePlayer(void)
 
 						case 3:
 
-							if (g_Player.sp >= 10.0f)
+							if (player.sp >= 10.0f)
 							{
 
-								g_Player.sp -= 10.0f;
+								player.sp -= 10.0f;
 
 								type = 1;
 
@@ -1591,10 +1591,10 @@ void UpdatePlayer(void)
 
 						case 4:
 
-							if (g_Player.sp >= 10.0f)
+							if (player.sp >= 10.0f)
 							{
 
-								g_Player.sp -= 10.0f;
+								player.sp -= 10.0f;
 
 								type = 2;
 
@@ -1604,10 +1604,10 @@ void UpdatePlayer(void)
 
 						case 5:
 
-							if (g_Player.sp >= 15.0f)
+							if (player.sp >= 15.0f)
 							{
 
-								g_Player.sp -= 15.0f;
+								player.sp -= 15.0f;
 
 								type = 0;
 
@@ -1626,10 +1626,10 @@ void UpdatePlayer(void)
 
 						case 6:
 
-							if (g_Player.sp >= 30.0f)
+							if (player.sp >= 30.0f)
 							{
 
-								g_Player.sp -= 30.0f;
+								player.sp -= 30.0f;
 
 								type = 1;
 
@@ -1648,10 +1648,10 @@ void UpdatePlayer(void)
 
 						case 7:
 
-							if (g_Player.sp >= 30.0f)
+							if (player.sp >= 30.0f)
 							{
 
-								g_Player.sp -= 30.0f;
+								player.sp -= 30.0f;
 
 								type = 2;
 
@@ -1676,12 +1676,12 @@ void UpdatePlayer(void)
 					if (GetKeyboardRelease(DIK_SPACE) || IsButtonReleased(1, BUTTON_B))
 					{
 						// アニメーションを再生する
-						g_Player.anim = FALSE;
+						player.anim = FALSE;
 
 						// 姿勢の再設定
 						oldPose = 3;
 
-						g_Player.pose = 3;
+						player.pose = 3;
 
 					}
 
@@ -1693,9 +1693,9 @@ void UpdatePlayer(void)
 		clTime++;
 
 		// 攻撃用のポイントの回復
-		if (g_Player.sp <= PLAYER_SP - 0.1f)
+		if (player.sp <= PLAYER_SP - 0.1f)
 		{
-			g_Player.sp += 0.1f;
+			player.sp += 0.1f;
 		}
 
 		// 構え中どうか
@@ -1703,7 +1703,7 @@ void UpdatePlayer(void)
 		{
 			if ((bullet[o].shot == FALSE) && (bullet[o].use == TRUE))
 			{
-				g_Player.pose = 2;
+				player.pose = 2;
 			}
 		}
 
@@ -1715,12 +1715,12 @@ void UpdatePlayer(void)
 	//-------------------------------------------------------------------------
 	{
 		// アニメーション再生中
-		switch (g_Player.tool)
+		switch (player.tool)
 		{
 		case 0:
-			if ((oldPose == 4) && (!g_Player.anim))
+			if ((oldPose == 4) && (!player.anim))
 			{
-				g_Player.pose = oldPose;
+				player.pose = oldPose;
 			}
 			break;
 
@@ -1733,9 +1733,9 @@ void UpdatePlayer(void)
 		case 5:
 		case 6:
 		case 7:
-			if ((oldPose == 3) && (!g_Player.anim))
+			if ((oldPose == 3) && (!player.anim))
 			{
-				g_Player.pose = oldPose;
+				player.pose = oldPose;
 			}
 			break;
 		}
@@ -1744,20 +1744,20 @@ void UpdatePlayer(void)
 		for (int j = 0; j < PLAYER_PARTS_MAX; j++)
 		{
 
-			switch (g_Player.pose)
+			switch (player.pose)
 			{
 			case 0: // 直立
 
 
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j;
+				parts[j].tblNo = j;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.0f;
+				player.rot.x = 0.0f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_idle_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_idle_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 
 
@@ -1766,13 +1766,13 @@ void UpdatePlayer(void)
 			case 1: // 歩行
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j + PLAYER_PARTS_MAX;
+				parts[j].tblNo = j + PLAYER_PARTS_MAX;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.1f;
+				player.rot.x = 0.1f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_walk_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_walk_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 
 				break;
@@ -1780,26 +1780,26 @@ void UpdatePlayer(void)
 			case 2: // 構え
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j + PLAYER_PARTS_MAX * 2;
+				parts[j].tblNo = j + PLAYER_PARTS_MAX * 2;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.0f;
+				player.rot.x = 0.0f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_stance_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_stance_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 				break;
 
 			case 3: // 投擲
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j + PLAYER_PARTS_MAX * 3;
+				parts[j].tblNo = j + PLAYER_PARTS_MAX * 3;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.0f;
+				player.rot.x = 0.0f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_throw_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_throw_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 				break;
 
@@ -1807,13 +1807,13 @@ void UpdatePlayer(void)
 
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j + PLAYER_PARTS_MAX * 4;
+				parts[j].tblNo = j + PLAYER_PARTS_MAX * 4;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.0f;
+				player.rot.x = 0.0f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_attak_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_attak_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 
 				break;
@@ -1821,13 +1821,13 @@ void UpdatePlayer(void)
 			case 5: // 走り
 
 					// アニメーションを切り替える
-				g_Parts[j].tblNo = j + PLAYER_PARTS_MAX * 5;
+				parts[j].tblNo = j + PLAYER_PARTS_MAX * 5;
 
 				// 姿勢を変更する
-				g_Player.rot.x = 0.2f;
+				player.rot.x = 0.2f;
 
 				// 最大テーブル数
-				g_Parts[j].tblMax = sizeof(move_tbl_run_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				parts[j].tblMax = sizeof(move_tbl_run_head) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 
 
 			}
@@ -1835,16 +1835,16 @@ void UpdatePlayer(void)
 		}
 
 		// 歩いていたら歩行アニメーションを再生する
-		if (g_Player.spd >= VALUE_MOVE)
+		if (player.spd >= VALUE_MOVE)
 		{
 			// 足のパーツのみアニメーションを変える
 			for (int p = 10; p < 18; ++p)
 			{
 				// 足のパーツ
-				g_Parts[p].tblNo = p + PLAYER_PARTS_MAX;
+				parts[p].tblNo = p + PLAYER_PARTS_MAX;
 
-				// 最大テーブル数(g_Parts[10]基準)
-				g_Parts[p].tblMax = sizeof(move_tbl_walk_lleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
+				// 最大テーブル数(parts[10]基準)
+				parts[p].tblMax = sizeof(move_tbl_walk_lleg01) / sizeof(INTERPOLATION_DATA);	// 再生するアニメデータのレコード数をセット
 			}
 		}
 
@@ -1852,14 +1852,14 @@ void UpdatePlayer(void)
 		for (int i = 0; i < PLAYER_PARTS_MAX; i++)
 		{
 			// 使われているなら処理する
-			if ((g_Parts[i].use) && (g_Parts[i].tblMax > 0))
+			if ((parts[i].use) && (parts[i].tblMax > 0))
 			{
 				// 線形補間の処理
-				int nowNo = (int)g_Parts[i].time;	// 整数分であるテーブル番号を取り出している
-				int maxNo = g_Parts[i].tblMax;		// 登録テーブル数を数えている
+				int nowNo = (int)parts[i].time;	// 整数分であるテーブル番号を取り出している
+				int maxNo = parts[i].tblMax;		// 登録テーブル数を数えている
 				int nextNo = (nowNo + 1) % maxNo;	// 移動先テーブルの番号を求めている
 
-				INTERPOLATION_DATA* tbl = g_MoveTblAdr[g_Parts[i].tblNo];	// 行動テーブルのアドレスを取得
+				INTERPOLATION_DATA* tbl = moveTblAdr[parts[i].tblNo];	// 行動テーブルのアドレスを取得
 
 				XMVECTOR nowPos = XMLoadFloat3(&tbl[nowNo].pos);	// XMVECTORへ変換
 				XMVECTOR nowRot = XMLoadFloat3(&tbl[nowNo].rot);	// XMVECTORへ変換
@@ -1869,33 +1869,33 @@ void UpdatePlayer(void)
 				XMVECTOR Rot = XMLoadFloat3(&tbl[nextNo].rot) - nowRot;	// XYZ回転量を計算している
 				XMVECTOR Scl = XMLoadFloat3(&tbl[nextNo].scl) - nowScl;	// XYZ拡大率を計算している
 
-				float nowTime = g_Parts[i].time - nowNo;	// 時間部分である少数を取り出している
+				float nowTime = parts[i].time - nowNo;	// 時間部分である少数を取り出している
 
 				Pos *= nowTime;			// 現在の移動量を計算している
 				Rot *= nowTime;			// 現在の回転量を計算している
 				Scl *= nowTime;			// 現在の拡大率を計算している
 
 				// 計算して求めた移動量を現在の移動テーブルXYZに足している＝表示座標を求めている
-				XMStoreFloat3(&g_Parts[i].pos, nowPos + Pos);
+				XMStoreFloat3(&parts[i].pos, nowPos + Pos);
 
 				// 計算して求めた回転量を現在の移動テーブルに足している
-				XMStoreFloat3(&g_Parts[i].rot, nowRot + Rot);
+				XMStoreFloat3(&parts[i].rot, nowRot + Rot);
 
 				// 計算して求めた拡大率を現在の移動テーブルに足している
-				XMStoreFloat3(&g_Parts[i].scl, nowScl + Scl);
+				XMStoreFloat3(&parts[i].scl, nowScl + Scl);
 
 				// frameを使て時間経過処理をする
-				g_Parts[i].time += 1.0f / tbl[nowNo].frame;	// 時間を進めている
+				parts[i].time += 1.0f / tbl[nowNo].frame;	// 時間を進めている
 
-				if ((int)g_Parts[i].time >= maxNo)			// 登録テーブル最後まで移動したか？
+				if ((int)parts[i].time >= maxNo)			// 登録テーブル最後まで移動したか？
 				{
-					g_Parts[i].time -= maxNo;				// 0番目にリセットしつつも小数部分を引き継いでいる
+					parts[i].time -= maxNo;				// 0番目にリセットしつつも小数部分を引き継いでいる
 				}
 
 				// アニメーションを最後まで再生したか
-				if ((int)g_Parts[i].time >= maxNo - 1)			// 登録テーブル最後まで移動したか？
+				if ((int)parts[i].time >= maxNo - 1)			// 登録テーブル最後まで移動したか？
 				{
-					g_Player.anim = TRUE;
+					player.anim = TRUE;
 
 				}
 
@@ -1910,18 +1910,18 @@ void UpdatePlayer(void)
 	// カメラの追従
 	{
 		// プレイヤー視点
-		XMFLOAT3 pos = g_Player.pos;
+		XMFLOAT3 pos = player.pos;
 
 		pos.x += sinf(cam[0].rot.y - XM_PI / 2) * 12.0f;
 		pos.z += cosf(cam[0].rot.y - XM_PI / 2) * 12.0f;
 
-		pos.y = g_Player.pos.y + POS_Y_CAM;
+		pos.y = player.pos.y + POS_Y_CAM;
 
 		SetCameraAT(pos);
 		SetCamera();
 
 		//// カメラの拡大縮小
-		//if ((g_Player.pose == 2) || (g_Player.pose == 3))
+		//if ((player.pose == 2) || (player.pose == 3))
 		//{// 近づく
 		//	if (cam[0].len > POS_Z_CAM / 2)
 		//	{
@@ -1951,13 +1951,13 @@ void UpdatePlayer(void)
 	// 村の中のみ
 	if (GetField() == VILLAGE)
 	{
-		float distance = GetDistance(g_Player.pos, { 0.0f, 0.0f, 0.0f });
+		float distance = GetDistance(player.pos, { 0.0f, 0.0f, 0.0f });
 
 		if (distance > 1000)
 		{
-			g_Player.pos.x = -g_Player.pos.x;
+			player.pos.x = -player.pos.x;
 
-			g_Player.pos.z = -g_Player.pos.z;
+			player.pos.z = -player.pos.z;
 		}
 
 	}
@@ -1969,7 +1969,7 @@ void UpdatePlayer(void)
 	// ダンジョン(1階)のみ
 	if (GetField() == DUNGEON_FIRST_FLOOR)
 	{
-		if (g_Player.pose == 4)
+		if (player.pose == 4)
 		{
 			ENEMY* enemy = GetEnemy();
 			for (int j = 0; j < ENEMY_MAX; j++)
@@ -1977,11 +1977,11 @@ void UpdatePlayer(void)
 				if (enemy[j].use == TRUE)
 				{
 
-					XMFLOAT3 pos = g_Player.pos;
+					XMFLOAT3 pos = player.pos;
 
 					// プレイヤーの前方に移動
-					pos.x -= sinf(g_Player.rot.y) * 20.0f;
-					pos.z -= cosf(g_Player.rot.y) * 20.0f;
+					pos.x -= sinf(player.rot.y) * 20.0f;
+					pos.z -= cosf(player.rot.y) * 20.0f;
 
 					if (CollisionBC(pos, enemy[j].pos, 15.0f, 15.0f))
 					{
@@ -2000,12 +2000,12 @@ void UpdatePlayer(void)
 							int nLife;
 							float fSize;
 
-							pos = g_Player.pos;
+							pos = player.pos;
 
 							pos.y = 15.0f;
 
-							pos.x -= sinf(g_Player.rot.y - 0.6f) * 9.0f;
-							pos.z -= cosf(g_Player.rot.y - 0.6f) * 9.0f;
+							pos.x -= sinf(player.rot.y - 0.6f) * 9.0f;
+							pos.z -= cosf(player.rot.y - 0.6f) * 9.0f;
 
 
 							scale = { 0.08f, 0.08f, 0.08f };
@@ -2040,10 +2040,10 @@ void UpdatePlayer(void)
 
 	{	// 静的オブジェクトの当たり判定
 
-		if (FieldHit(g_Player.pos, oldPos))
+		if (FieldHit(player.pos, oldPos))
 		{
 			// ポジションをもとに戻す
-			g_Player.pos = oldPos;
+			player.pos = oldPos;
 		}
 
 	}
@@ -2063,12 +2063,12 @@ void UpdatePlayer(void)
 		{
 			if (bomb[k].use == TRUE)
 			{
-				BOOL ans = CollisionBC(g_Player.pos, bomb[k].pos, 10.0f, 10.0f);
+				BOOL ans = CollisionBC(player.pos, bomb[k].pos, 10.0f, 10.0f);
 
 				if (ans == TRUE)
 				{
 					// ポジションをもとに戻す
-					g_Player.pos = oldPos;
+					player.pos = oldPos;
 
 					break;
 				}
@@ -2087,7 +2087,7 @@ void UpdatePlayer(void)
 	//-------------------------------------------------------------------------
 	{
 		// 松明の炎
-		if (g_Player.tool == 1)
+		if (player.tool == 1)
 		{
 			XMFLOAT3 pos;
 			XMFLOAT3 move;
@@ -2096,18 +2096,18 @@ void UpdatePlayer(void)
 			int nLife;
 			float fSize;
 
-			pos = g_Player.pos;
+			pos = player.pos;
 
 			pos.y -= 0.8f;
 
 			// 入力のあった方向へプレイヤーを向かせて移動させる
-			pos.x -= sinf(g_Player.rot.y - 0.6f) * 9.0f;
-			pos.z -= cosf(g_Player.rot.y - 0.6f) * 9.0f;
+			pos.x -= sinf(player.rot.y - 0.6f) * 9.0f;
+			pos.z -= cosf(player.rot.y - 0.6f) * 9.0f;
 
 			// 歩いているまたは走っているかかどうか
-			if ((g_Player.pose == 1) || (g_Player.pose == 5))
+			if ((player.pose == 1) || (player.pose == 5))
 			{
-				pos.y -= g_Parts[6].rot.x * 12;
+				pos.y -= parts[6].rot.x * 12;
 
 				pos.y += 1;
 
@@ -2161,7 +2161,7 @@ void UpdatePlayer(void)
 			float fSize;
 
 			// 初期化
-			pos = g_Player.pos;
+			pos = player.pos;
 			move.x = 0.0f;
 			move.y = 0.0f;
 			move.z = 0.0f;
@@ -2171,12 +2171,12 @@ void UpdatePlayer(void)
 			fSize = 10.0f;
 
 			// 姿勢によって目の位置を調整する
-			switch (g_Player.pose)
+			switch (player.pose)
 			{
 			case 0: // 通常姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y - 0.3f) * 2.3f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y - 0.3f) * 2.3f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y - 0.3f) * 2.3f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y - 0.3f) * 2.3f;
 
 				pos.y += 7.4f;
 
@@ -2186,8 +2186,8 @@ void UpdatePlayer(void)
 
 			case 1: // 前傾姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y - 0.2f) * 3.0f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y - 0.2f) * 3.0f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y - 0.2f) * 3.0f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y - 0.2f) * 3.0f;
 
 				pos.y += 7.3f;
 
@@ -2199,15 +2199,15 @@ void UpdatePlayer(void)
 			case 3: // 構え姿勢
 			case 4: // 攻撃姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y - 0.3f) * 2.3f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y - 0.3f) * 2.3f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y - 0.3f) * 2.3f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y - 0.3f) * 2.3f;
 
 				pos.y += 7.4f;
 
 				scale = { 0.007f, 0.007f, 0.007f };
 
 				// 歩いていたらサイズを大きくする
-				if (g_Player.spd == VALUE_MOVE)
+				if (player.spd == VALUE_MOVE)
 				{
 					scale = { 0.02f, 0.02f, 0.02f };
 				}
@@ -2216,8 +2216,8 @@ void UpdatePlayer(void)
 
 			case 5: // 走り姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y - 0.15f) * 3.7f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y - 0.15f) * 3.7f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y - 0.15f) * 3.7f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y - 0.15f) * 3.7f;
 
 				pos.y += 7.0f;
 
@@ -2228,7 +2228,7 @@ void UpdatePlayer(void)
 			}
 
 			// 歩いるとき時の処理
-			if (g_Player.spd == VALUE_MOVE)
+			if (player.spd == VALUE_MOVE)
 			{
 
 				nLife = 80;
@@ -2236,19 +2236,19 @@ void UpdatePlayer(void)
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y);
-				pos.z += cosf(g_Player.rot.y);
+				pos.x += sinf(player.rot.y);
+				pos.z += cosf(player.rot.y);
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y);
-				pos.z += cosf(g_Player.rot.y);
+				pos.x += sinf(player.rot.y);
+				pos.z += cosf(player.rot.y);
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 			}
-			else if (g_Player.spd == VALUE_DASH_MOVE) // 走っているときの処理
+			else if (player.spd == VALUE_DASH_MOVE) // 走っているときの処理
 			{
 
 				nLife = 80;
@@ -2256,19 +2256,19 @@ void UpdatePlayer(void)
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
@@ -2281,15 +2281,15 @@ void UpdatePlayer(void)
 
 
 			// 座標の初期化
-			pos = g_Player.pos;
+			pos = player.pos;
 
 			// 姿勢によって目の位置を調整する
-			switch (g_Player.pose)
+			switch (player.pose)
 			{
 			case 0: // 通常姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y + 0.3f) * 2.3f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y + 0.3f) * 2.3f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y + 0.3f) * 2.3f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y + 0.3f) * 2.3f;
 
 				pos.y += 7.4f;
 
@@ -2299,8 +2299,8 @@ void UpdatePlayer(void)
 
 			case 1: // 前傾姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y + 0.2f) * 3.0f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y + 0.2f) * 3.0f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y + 0.2f) * 3.0f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y + 0.2f) * 3.0f;
 
 				pos.y += 7.3f;
 
@@ -2312,15 +2312,15 @@ void UpdatePlayer(void)
 			case 3: // 投擲姿勢
 			case 4: // 攻撃姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y + 0.3f) * 2.3f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y + 0.3f) * 2.3f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y + 0.3f) * 2.3f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y + 0.3f) * 2.3f;
 
 				pos.y += 7.4f;
 
 				scale = { 0.007f, 0.007f, 0.007f };
 
 				// 歩いていたらサイズを大きくする
-				if (g_Player.spd == VALUE_MOVE)
+				if (player.spd == VALUE_MOVE)
 				{
 					scale = { 0.02f, 0.02f, 0.02f };
 				}
@@ -2329,8 +2329,8 @@ void UpdatePlayer(void)
 
 			case 5: // 走り姿勢
 
-				pos.x -= sinf(g_Player.rot.y + g_Parts[0].rot.y + 0.15f) * 3.7f;
-				pos.z -= cosf(g_Player.rot.y + g_Parts[0].rot.y + 0.15f) * 3.7f;
+				pos.x -= sinf(player.rot.y + parts[0].rot.y + 0.15f) * 3.7f;
+				pos.z -= cosf(player.rot.y + parts[0].rot.y + 0.15f) * 3.7f;
 
 				pos.y += 7.0f;
 
@@ -2341,7 +2341,7 @@ void UpdatePlayer(void)
 			}
 
 			// 歩いるときの処理
-			if (g_Player.spd == VALUE_MOVE)
+			if (player.spd == VALUE_MOVE)
 			{
 
 				nLife = 80;
@@ -2349,19 +2349,19 @@ void UpdatePlayer(void)
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y);
-				pos.z += cosf(g_Player.rot.y);
+				pos.x += sinf(player.rot.y);
+				pos.z += cosf(player.rot.y);
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y);
-				pos.z += cosf(g_Player.rot.y);
+				pos.x += sinf(player.rot.y);
+				pos.z += cosf(player.rot.y);
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 			}
-			else if (g_Player.spd == VALUE_DASH_MOVE) // 走っているときの処理
+			else if (player.spd == VALUE_DASH_MOVE) // 走っているときの処理
 			{
 
 				nLife = 80;
@@ -2369,19 +2369,19 @@ void UpdatePlayer(void)
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
-				pos.x += sinf(g_Player.rot.y) / 2;
-				pos.z += cosf(g_Player.rot.y) / 2;
+				pos.x += sinf(player.rot.y) / 2;
+				pos.z += cosf(player.rot.y) / 2;
 				// ビルボードの設定
 				SetParticle(pos, pos, move, scale, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), fSize, fSize, nLife, 0);
 
@@ -2397,7 +2397,7 @@ void UpdatePlayer(void)
 	}
 
 	// 入力がない時にスピードを減少させる
-	g_Player.spd *= 0.5f;
+	player.spd *= 0.5f;
 
 }
 
@@ -2407,7 +2407,7 @@ void UpdatePlayer(void)
 void DrawPlayer(void)
 {
 
-	if (g_Player.use == FALSE) return;
+	if (player.use == FALSE) return;
 
 	// カリング無効
 	SetCullingMode(CULL_MODE_NONE);
@@ -2420,25 +2420,25 @@ void DrawPlayer(void)
 	mtxWorld = XMMatrixIdentity();
 
 	// スケールを反映
-	mtxScl = XMMatrixScaling(g_Player.scl.x, g_Player.scl.y, g_Player.scl.z);
+	mtxScl = XMMatrixScaling(player.scl.x, player.scl.y, player.scl.z);
 	mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 	// 回転を反映
-	mtxRot = XMMatrixRotationRollPitchYaw(g_Player.rot.x, g_Player.rot.y + XM_PI, g_Player.rot.z);
+	mtxRot = XMMatrixRotationRollPitchYaw(player.rot.x, player.rot.y + XM_PI, player.rot.z);
 	mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 	// 移動を反映
-	mtxTranslate = XMMatrixTranslation(g_Player.pos.x, g_Player.pos.y, g_Player.pos.z);
+	mtxTranslate = XMMatrixTranslation(player.pos.x, player.pos.y, player.pos.z);
 	mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
 	// ワールドマトリックスの設定
 	SetWorldMatrix(&mtxWorld);
 
 	// 自分を描画したときにしようしたマトリクスを保存しておく
-	XMStoreFloat4x4(&g_Player.mtxWorld, mtxWorld);
+	XMStoreFloat4x4(&player.mtxWorld, mtxWorld);
 
 	// モデル描画
-	DrawModel(&g_Player.model);
+	DrawModel(&player.model);
 
 
 	// パーツの階層アニメーション
@@ -2448,28 +2448,28 @@ void DrawPlayer(void)
 		mtxWorld = XMMatrixIdentity();
 
 		// スケールを反映
-		mtxScl = XMMatrixScaling(g_Parts[i].scl.x, g_Parts[i].scl.y, g_Parts[i].scl.z);
+		mtxScl = XMMatrixScaling(parts[i].scl.x, parts[i].scl.y, parts[i].scl.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxScl);
 
 		// 回転を反映
-		mtxRot = XMMatrixRotationRollPitchYaw(g_Parts[i].rot.x, g_Parts[i].rot.y, g_Parts[i].rot.z);
+		mtxRot = XMMatrixRotationRollPitchYaw(parts[i].rot.x, parts[i].rot.y, parts[i].rot.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxRot);
 
 		// 移動を反映
-		mtxTranslate = XMMatrixTranslation(g_Parts[i].pos.x, g_Parts[i].pos.y, g_Parts[i].pos.z);
+		mtxTranslate = XMMatrixTranslation(parts[i].pos.x, parts[i].pos.y, parts[i].pos.z);
 		mtxWorld = XMMatrixMultiply(mtxWorld, mtxTranslate);
 
-		if (g_Parts[i].parent != NULL)	// 子供だったら親と結合する
+		if (parts[i].parent != NULL)	// 子供だったら親と結合する
 		{
-			mtxWorld = XMMatrixMultiply(mtxWorld, XMLoadFloat4x4(&g_Parts[i].parent->mtxWorld));
+			mtxWorld = XMMatrixMultiply(mtxWorld, XMLoadFloat4x4(&parts[i].parent->mtxWorld));
 			// ↑
-			// g_Player.mtxWorldを指している
+			// player.mtxWorldを指している
 		}
 
-		XMStoreFloat4x4(&g_Parts[i].mtxWorld, mtxWorld);
+		XMStoreFloat4x4(&parts[i].mtxWorld, mtxWorld);
 
 		// 使われているなら処理する。ここまで処理している理由は他のパーツがこのパーツを参照している可能性があるから。
-		if (g_Parts[i].use == FALSE) continue;
+		if (parts[i].use == FALSE) continue;
 
 		// ワールドマトリックスの設定
 		SetWorldMatrix(&mtxWorld);
@@ -2477,12 +2477,12 @@ void DrawPlayer(void)
 		if (i != PLAYER_PARTS_MAX - 1)
 		{
 			// モデル描画(体)
-			DrawModel(&g_Parts[i].model);
+			DrawModel(&parts[i].model);
 		}
 		else
 		{	// 所持品の描画
 
-			switch (g_Player.tool) // 今手に持っているものを描画する
+			switch (player.tool) // 今手に持っているものを描画する
 			{
 			case 0: // 剣
 				DrawModel(&mSword);
@@ -2508,7 +2508,7 @@ void DrawPlayer(void)
 //=============================================================================
 PLAYER* GetPlayer(void)
 {
-	return &g_Player;
+	return &player;
 }
 
 //=============================================================================

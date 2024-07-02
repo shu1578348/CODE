@@ -1,7 +1,7 @@
 //=============================================================================
 //
 // メイン処理 [main.cpp]
-// Author : 
+// Author : 荒山　秀磨
 //
 //=============================================================================
 #include "main.h"
@@ -52,8 +52,8 @@ void Draw(void);
 //*****************************************************************************
 // グローバル変数:
 //*****************************************************************************
-long g_MouseX = 0;
-long g_MouseY = 0;
+long mouseX = 0;
+long mouseY = 0;
 
 #ifdef _DEBUG
 						// FPSカウンタ
@@ -62,7 +62,7 @@ char	g_DebugStr[2048] = WINDOW_NAME;		// デバッグ文字表示用
 
 #endif
 
-int	g_Mode = MODE_TITLE;					// 起動時の画面を設定
+int	mode = MODE_TITLE;					// 起動時の画面を設定
 
 
 //=============================================================================
@@ -210,8 +210,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_MOUSEMOVE:
-		g_MouseX = LOWORD(lParam);
-		g_MouseY = HIWORD(lParam);
+		mouseX = LOWORD(lParam);
+		mouseY = HIWORD(lParam);
 		break;
 
 	default:
@@ -252,7 +252,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	InitFade();
 
 	// 最初のモードをセット
-	SetMode(g_Mode);	// ここはSetModeのまま
+	SetMode(mode);	// ここはSetModeのまま
 
 	// カーソルを非表示にする
 	ShowCursor(FALSE);
@@ -296,7 +296,7 @@ void Update(void)
 	// カメラ更新
 	UpdateCamera();
 
-	switch (g_Mode)
+	switch (mode)
 	{
 	case MODE_TITLE:
 
@@ -350,7 +350,7 @@ void Draw(void)
 	SetViewPort(TYPE_FULL_SCREEN);
 
 
-	switch (g_Mode)
+	switch (mode)
 	{
 	case MODE_TITLE:
 		// ライティングを無効
@@ -443,12 +443,12 @@ void Draw(void)
 
 long GetMousePosX(void)
 {
-	return g_MouseX;
+	return mouseX;
 }
 
 long GetMousePosY(void)
 {
-	return g_MouseY;
+	return mouseY;
 }
 
 #ifdef _DEBUG
@@ -461,7 +461,7 @@ char* GetDebugStr(void)
 //=============================================================================
 // モードの設定
 //=============================================================================
-void SetMode(int mode)
+void SetMode(int nextMode)
 {
 
 	// モードを変える前に全部メモリを解放する
@@ -480,9 +480,9 @@ void SetMode(int mode)
 	UninitGame();
 
 	// 次のモードをセットしている
-	g_Mode = mode;
+	mode = nextMode;
 
-	switch (g_Mode)
+	switch (mode)
 	{
 	case MODE_TITLE:
 
@@ -523,5 +523,5 @@ void SetMode(int mode)
 //=============================================================================
 int GetMode(void)
 {
-	return g_Mode;
+	return mode;
 }
